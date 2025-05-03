@@ -5,15 +5,16 @@ import "managers/stateManager"
 import "managers/UIManager"
 import "managers/playerManager"
 
+
 -- Initialize managers
 PlayerManager:initialize()
+UIManager:initialize()
 
 function pd.update()
     StateManager:update()
     gfx.clear()
     
     PlayerManager:update()
-    PlayerManager:draw()
-    UIManager:drawUI()
+    UIManager:update()
     
 end
