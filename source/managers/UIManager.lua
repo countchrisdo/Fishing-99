@@ -11,7 +11,7 @@ MaxHeight = 240
 UIManager = {}
 -- UIManager to handle UI elements and interactions
 function UIManager:initialize()
-    self.WaterY = 64 -- Initial water level
+
 end
 
 function UIManager:drawUI()
@@ -35,12 +35,11 @@ function UIManager:drawUI()
 end
 
 function UIManager:draw()
-    gfx.drawLine(0, 64+self.WaterY, MaxWidth, 64+self.WaterY) -- Water surface line
+    
     self:drawUI()
 end
 
 function UIManager:update()
     -- Update logic for UI elements can go here
-    self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 4 -- Example water wave effect
-    self:draw()
+    self:draw() --draw is called here to ensure UI is drawn regardless of the cameraPosition
 end

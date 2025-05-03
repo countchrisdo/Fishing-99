@@ -96,7 +96,8 @@ function PlayerManager:update()
         end
     end
 
-    self:draw()
+    -- self:draw()
+    -- self:draw() is now called in the CameraManager:draw() method
 end
 function PlayerManager:handleInput()
     -- Handle player input for movement and actions
