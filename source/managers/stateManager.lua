@@ -27,11 +27,6 @@ end
 
 function StateManager:update()
     -- Logic to handle state-specific updates can go here
-    if self.currentState == "idle" then
-        -- Handle idle state logic
-    elseif self.currentState == "casting" then
-        -- Handle casting state logic
-    end
 end
 
 function pd.update()

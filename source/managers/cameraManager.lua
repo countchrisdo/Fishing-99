@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
--- import "managers/playerManager"
+import "managers/UIManager"
 -- local hookdepth = PlayerManager.hookDepth
 
 CameraManager = {}
@@ -24,7 +24,7 @@ end
 
 function CameraManager:moveCamera(depth)
     -- This function will be called by PlayerManager to adjust the camera based on hook depth
-    self.cameraPosition.y = depth / 10  -- Adjust camera position based on depth, scaling to fit the screen height
+    self.cameraPosition.y = depth
 end
 
 function CameraManager:draw()

@@ -14,10 +14,8 @@ CameraManager:initialize()
 function pd.update()
     StateManager:update()
     gfx.clear()
-    
+    -- /pull boobs
     PlayerManager:update()
     CameraManager:update()
     UIManager:update()
-    
-    
 end

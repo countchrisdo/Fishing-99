@@ -21,6 +21,7 @@ function PlayerManager:initialize()
     self.hookInventorymax = 3 -- Maximum items on the hook
     self.hookSpeed = 2 -- Speed of the hook movement
     self.depth = 0 -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
+    self.depthMax = 1000 -- Maximum depth
 end
 function PlayerManager:setState(newState)
     self.playerState = newState
@@ -77,10 +78,8 @@ function PlayerManager:update()
             StateManager:setState("fishing")
         end
     elseif StateManager.currentState == "fishing" then
-        -- Handle fishing logic here, e.g., checking for fish bites
-        -- Use the crank to increase the depth
 
-        self:handleInput() -- Handle player input for moving the hook
+        self:handleInput()
         if #self.hookInventory >= self.hookInventorymax then
             -- If the hook is full, switch to reeling state
             StateManager:setState("reeling")
@@ -114,9 +113,18 @@ function PlayerManager:handleInput()
     -- Handle crank input
     if pd.isCrankDocked() == false then
         local crankChange = pd.getCrankChange()
-        self.depth = self.depth + crankChange
-        print("Depth adjusted to:", self.depth)
-        CameraManager:moveCamera(self.depth)
+        self.depth = math.floor(self.depth + crankChange)
+
+        if self.depth < 0 then
+            self.depth = 0
+            print("Too High, Depth adjusted to:", self.depth)
+        elseif self.depth >= self.depthMax then
+            self.depth = self.depthMax
+            print("Too High Depth adjusted to:", self.depth)
+        else
+            print("Depth adjusted to:", self.depth)
+            CameraManager:moveCamera(self.depth)
+        end
     end
 end
 function PlayerManager:reset()
