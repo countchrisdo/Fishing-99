@@ -18,6 +18,7 @@ function PlayerManager:initialize()
     self.pSprite = gfx.image.new("assets/sprites/gup")
     self.playerPosition = { x = 8, y = 24 }
 
+    self.pMoney = 0 -- Player's money
     self.hookInventory = {}
     self.hookInventorymax = 3 -- Maximum items on the hook
     self.hookSpeed = 2 -- Speed of the hook movement
@@ -90,6 +91,7 @@ function PlayerManager:update()
         self:handleInput()
         -- Check for fish collision
         FishManager:checkCollisionHook(self.hookPosition.x, self.hookPosition.y)
+
         -- Check if the hook is full
         if #self.hookInventory >= self.hookInventorymax then
             -- If the hook is full, switch to reeling state
@@ -97,16 +99,28 @@ function PlayerManager:update()
             print("Hook is full, reeling in...")
         end
     elseif StateManager.currentState == "reeling" then
-        -- Handle reeling in the hook
         self:handleInput() -- Handle player input for moving the hook
-        if self.hookPosition.y >= self.playerPosition.y + 20 then
-            -- Hook has reached the player, switch back to idle state
+        if self.depth > 0 then
+            self.depth = self.depth - 2
+            self.hookPosition.y = CameraManager.cameraPosition.y + 64
+            CameraManager:moveCamera(self.depth)
+            print("Depth adjusted to:", self.depth)
+        else
+            -- Hook has reached the player
+            -- Add the value of the caught fish to the player's money
+            for i = 1, #self.hookInventory do
+                self.pMoney = self.pMoney + self.hookInventory[i].value
+                print("Caught fish value:", self.hookInventory[i].value)
+            end
+            print("Total money:", self.pMoney)
+            -- Clear the hook inventory
+            self.hookInventory = {}
             StateManager:setState("idle")
             print("Hook retracted, back to idle state.")
         end
     end
-
 end
+
 function PlayerManager:handleInput()
     -- Handle player input for movement and actions
     if pd.buttonIsPressed(pd.kButtonUp) then

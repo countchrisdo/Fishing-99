@@ -38,16 +38,21 @@ function FishManager:spawnFish(depth)
         end
 
         local fishSprite = gfx.sprite.new(fishImage)
-        fishSprite:setCenter(0.5, 0.5) 
-        fishSprite:moveTo(math.random(100, 300), math.random(64, 200)) -- Random position
+        fishSprite:setCenter(0.5, 0.5)
+
+        -- gfx.pushContext()
+        -- gfx.setDrawOffset(0, -CameraManager.cameraPosition.y)
+        fishSprite:moveTo(0, CameraManager.cameraPosition.y + math.random(64, 128))
         fishSprite:add()
+        -- gfx.popContext()
+
         fish.ID = math.random(1, 1000) -- Unique ID for the fish
         print("Spawned fish:", fish.name .. " With ID:", fish.ID)
 
         table.insert(self.activeFish, {
             sprite = fishSprite,
             data = fish,
-            speed = math.random(1, 3) -- Random horizontal speed
+            speed = math.random(1, 3)
         })
         print("activeFish Number:", #self.activeFish)
     end
@@ -63,6 +68,7 @@ function FishManager:checkCollisionHook(hookX, hookY)
             if math.abs(fishX - hookX) < 10 and math.abs(fishY - hookY) < 10 then
                 self.currentFish = fish.data
                 fish.sprite:remove()
+                table.insert(PlayerManager.hookInventory, fish.data)
                 table.remove(self.activeFish, i)
                 print("Caught fish:", fish.data.name)
                 break

@@ -5,7 +5,7 @@ FishData = {
     {
         name = "Bass",
         value = 10,
-        depthRange = { min = 0, max = 200 },
+        depthRange = { min = 100, max = 200 },
         spritePath = "assets/sprites/fish"
     },
     {
