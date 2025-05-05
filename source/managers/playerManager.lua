@@ -3,6 +3,7 @@ local gfx <const> = playdate.graphics
 
 import "managers/UIManager"
 import "managers/cameraManager"
+import "managers/fishManager"
 
 PlayerManager = {
 }
@@ -63,7 +64,7 @@ function PlayerManager:update()
     elseif StateManager.currentState == "casting" then
         -- Move the hook towards the center of the screen
         local targetX = MaxWidth / 2 - 2.5 -- Center of the screen minus half the hook width
-        local targetY = MaxHeight / 2 - 12.5 -- Center of the screen minus half the hook height
+        local targetY = MaxHeight / 2 + 130 -- Center of the screen plus some offset
 
         if self.hookPosition.x < targetX then
             self.hookPosition.x = math.min(self.hookPosition.x + self.hookSpeed, targetX)
@@ -77,9 +78,19 @@ function PlayerManager:update()
             print("Hook reached the center of the screen.")
             StateManager:setState("fishing")
         end
-    elseif StateManager.currentState == "fishing" then
 
+        -- Move Depth lower
+        if self.depth < 125 then
+            self.depth = self.depth + 2
+            CameraManager:moveCamera(self.depth)
+            print("Depth adjusted to:", self.depth)
+        end
+
+    elseif StateManager.currentState == "fishing" then
         self:handleInput()
+        -- Check for fish collision
+        FishManager:checkCollisionHook(self.hookPosition.x, self.hookPosition.y)
+        -- Check if the hook is full
         if #self.hookInventory >= self.hookInventorymax then
             -- If the hook is full, switch to reeling state
             StateManager:setState("reeling")
@@ -95,8 +106,6 @@ function PlayerManager:update()
         end
     end
 
-    -- self:draw()
-    -- self:draw() is now called in the CameraManager:draw() method
 end
 function PlayerManager:handleInput()
     -- Handle player input for movement and actions
@@ -120,9 +129,8 @@ function PlayerManager:handleInput()
             print("Too High, Depth adjusted to:", self.depth)
         elseif self.depth >= self.depthMax then
             self.depth = self.depthMax
-            print("Too High Depth adjusted to:", self.depth)
+            print("Too Low Depth adjusted to:", self.depth)
         else
-            print("Depth adjusted to:", self.depth)
             CameraManager:moveCamera(self.depth)
         end
     end

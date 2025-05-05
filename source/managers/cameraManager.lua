@@ -32,6 +32,7 @@ function CameraManager:draw()
     gfx.setDrawOffset(0, -self.cameraPosition.y)  -- Adjust y offset based on camera position
     
     -- Draw the game world here
+    gfx.sprite.update()
     PlayerManager:draw()
     gfx.drawLine(0, 64+self.WaterY, MaxWidth, 64+self.WaterY) -- Water surface line
     gfx.popContext()
