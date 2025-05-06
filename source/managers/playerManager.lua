@@ -18,11 +18,8 @@ function PlayerManager:initialize()
     self.hSprite:setCollideRect(0, 0, self.hSprite:getSize())
     self.hSprite:setZIndex(Z_INDEX.PLAYER)
     self.hSprite:setTag(1)
-    -- self.hSprite:setGroups(1)
-
     self.hSprite:add()
 
-    -- self.hookPosition = { x = 32, y = 32 }
     self.pSprite = gfx.image.new("assets/sprites/gup")
     self.playerPosition = { x = 8, y = 24 }
 
@@ -50,7 +47,7 @@ function PlayerManager:draw()
         self.hSprite:moveTo(self.playerPosition.x + 64, self.playerPosition.y + 16)
     end
     -- draw fishing line
-    gfx.drawLine(self.playerPosition.x + 64, self.playerPosition.y + 16, self.hSprite.x, self.hSprite.y - 16)
+    gfx.drawLine(self.playerPosition.x + 64, self.playerPosition.y + 16, self.hSprite.x, self.hSprite.y - 8)
 end
 
 function PlayerManager:update()
@@ -93,13 +90,10 @@ function PlayerManager:update()
 
     elseif StateManager.currentState == "fishing" then
         self:handleInput()
-        -- FishManager:checkCollisionHook(self.hSprite.x, self.hSprite.y)
-        -- Switch to using built in checkCollisions function 
         local collisions = self.hSprite:overlappingSprites()
         for i, sprite in ipairs(collisions) do
             if sprite:getTag() == 2 then -- Assuming fish sprites have tag 2
                 print("Collision with fish detected!")
-                
                 local curFish = nil
                 for idx = 1, #FishManager.activeFish do
                     if FishManager.activeFish[idx].sprite == sprite then
@@ -116,12 +110,11 @@ function PlayerManager:update()
             end
         end
 
-
-
         if #self.hookInventory >= self.hookInventorymax then
             StateManager:setState("reeling")
             print("Hook is full, reeling in...")
         end
+
     elseif StateManager.currentState == "reeling" then
         self:handleInput() -- Handle player input for moving the hook
         if self.depth > 0 then
@@ -173,6 +166,27 @@ function PlayerManager:handleInput()
             print("Too Low Depth adjusted to:", self.depth)
         else
             CameraManager:moveCamera(self.depth)
+            if self.hSprite.y >= MaxHeight + self.depth then
+                self.hSprite:moveTo(self.hSprite.x, MaxHeight + self.depth)
+                print("Too far down, Hook adjusted to:", self.depth)
+            elseif self.hSprite.y <= 0 + self.depth then
+                self.hSprite:moveTo(self.hSprite.x, 0 + self.depth)
+                print("Too far up, Hook adjusted to:", self.depth)
+            elseif self.hSprite.x <= 0 then
+                self.hSprite:moveTo(0, self.hSprite.y)
+                print("Too far left, Hook adjusted to:", self.depth)
+            elseif self.hSprite.x >= MaxWidth then
+                self.hSprite:moveTo(MaxWidth, self.hSprite.y)
+                print("Too far right, Hook adjusted to:", self.depth)
+            end
+            -- Clamp the hook's y position to stay towards the center of the screen
+            if self.hSprite.y  < 40 + self.depth then
+                self.hSprite:moveTo(self.hSprite.x, self.hSprite.y + 2)
+                print("Too High! Clamping Y Position:", self.hSprite.y)
+            elseif self.hSprite.y  > 200 + self.depth then
+                self.hSprite:moveTo(self.hSprite.x, self.hSprite.y - 2)
+                print("Too Low! Clamping Y Position:", self.hSprite.y)
+            end
         end
     end
 end

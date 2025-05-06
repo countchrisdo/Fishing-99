@@ -13,15 +13,6 @@ function CameraManager:initialize()
     self.WaterY = 64 -- Initial water level
 end
 
-function CameraManager:setPosition(x, y)
-    self.cameraPosition.x = x
-    self.cameraPosition.y = y
-end
-
-function CameraManager:getPosition()
-    return self.cameraPosition
-end
-
 function CameraManager:moveCamera(depth)
     -- This function will be called by PlayerManager to adjust the camera based on hook depth
     self.cameraPosition.y = depth
