@@ -19,7 +19,7 @@ function PlayerManager:initialize()
     
     self.hSprite:add()
 
-    self.hookPosition = { x = 32, y = 32 }
+    -- self.hookPosition = { x = 32, y = 32 }
     self.pSprite = gfx.image.new("assets/sprites/gup")
     self.playerPosition = { x = 8, y = 24 }
 
@@ -37,10 +37,6 @@ end
 function PlayerManager:getState()
     return self.playerState
 end
-function PlayerManager:moveHook(x, y)
-    self.hookPosition.x = x
-    self.hookPosition.y = y
-end
 
 function PlayerManager:draw()
     -- Draw Player
@@ -48,21 +44,15 @@ function PlayerManager:draw()
     -- Draw Player's Boat
     gfx.drawRect(self.playerPosition.x, self.playerPosition.y + 56, 80, 32)
     if StateManager.currentState == "idle" then
-        -- do nothing, player is idle
-    elseif StateManager.currentState == "casting" then
-        gfx.drawRect(self.hookPosition.x, self.hookPosition.y, 5, 25)
-    elseif StateManager.currentState == "fishing" then
-        gfx.fillRect(self.hookPosition.x, self.hookPosition.y, 5, 25)
-    elseif StateManager.currentState == "reeling" then
-        gfx.fillRect(self.hookPosition.x, self.hookPosition.y, 5, 25)
+        self.hSprite:moveTo(self.playerPosition.x + 64, self.playerPosition.y + 16)
     end
     -- draw fishing line
-    gfx.drawLine(self.playerPosition.x + 64, self.playerPosition.y + 16, self.hookPosition.x + 2.5, self.hookPosition.y)
+    gfx.drawLine(self.playerPosition.x + 64, self.playerPosition.y + 16, self.hSprite.x, self.hSprite.y - 16)
 end
 
 function PlayerManager:update()
     if StateManager.currentState == "idle" then
-        self.hookPosition.y = self.playerPosition.y
+        self.hSprite.y = self.playerPosition.y
         if pd.buttonIsPressed(pd.kButtonA) then
             StateManager:setState("casting")
             SoundManager:playSound("cast", 1)
@@ -74,15 +64,15 @@ function PlayerManager:update()
         local targetX = MaxWidth / 2 - 2.5 -- Center of the screen minus half the hook width
         local targetY = MaxHeight / 2 + 130 -- Center of the screen plus some offset
 
-        if self.hookPosition.x < targetX then
-            self.hookPosition.x = math.min(self.hookPosition.x + self.hookSpeed, targetX)
+        if self.hSprite.x < targetX then
+            self.hSprite:moveTo(self.hSprite.x + self.hookSpeed, self.hSprite.y)
         end
-        if self.hookPosition.y < targetY then
-            self.hookPosition.y = math.min(self.hookPosition.y + self.hookSpeed, targetY)
+        if self.hSprite.y < targetY then
+            self.hSprite:moveTo(self.hSprite.x, self.hSprite.y + self.hookSpeed)
         end
 
         -- Stop moving when the hook reaches the target position
-        if self.hookPosition.x == targetX and self.hookPosition.y == targetY then
+        if self.hSprite.x >= targetX and self.hSprite.y >= targetY then
             print("Hook reached the center of the screen.")
 
             -- Play this sound when hook collides with the water
@@ -100,7 +90,7 @@ function PlayerManager:update()
 
     elseif StateManager.currentState == "fishing" then
         self:handleInput()
-        FishManager:checkCollisionHook(self.hookPosition.x, self.hookPosition.y)
+        FishManager:checkCollisionHook(self.hSprite.x, self.hSprite.y)
 
         if #self.hookInventory >= self.hookInventorymax then
             StateManager:setState("reeling")
@@ -110,7 +100,7 @@ function PlayerManager:update()
         self:handleInput() -- Handle player input for moving the hook
         if self.depth > 0 then
             self.depth = self.depth - 2
-            self.hookPosition.y = CameraManager.cameraPosition.y + 64
+            self.hSprite:moveTo( self.hSprite.x, CameraManager.cameraPosition.y + 64)
             CameraManager:moveCamera(self.depth)
             print("Depth adjusted to:", self.depth)
         else
@@ -133,13 +123,13 @@ end
 function PlayerManager:handleInput()
     -- Handle player input for movement and actions
     if pd.buttonIsPressed(pd.kButtonUp) then
-        self:moveHook(self.hookPosition.x, self.hookPosition.y - self.hookSpeed)
+        self.hSprite:moveTo(self.hSprite.x, self.hSprite.y - self.hookSpeed)
     elseif pd.buttonIsPressed(pd.kButtonDown) then
-        self:moveHook(self.hookPosition.x, self.hookPosition.y + self.hookSpeed)
+        self.hSprite:moveTo(self.hSprite.x, self.hSprite.y + self.hookSpeed)
     elseif pd.buttonIsPressed(pd.kButtonLeft) then
-        self:moveHook(self.hookPosition.x - self.hookSpeed, self.hookPosition.y)
+        self.hSprite:moveTo(self.hSprite.x - self.hookSpeed, self.hSprite.y)
     elseif pd.buttonIsPressed(pd.kButtonRight) then
-        self:moveHook(self.hookPosition.x + self.hookSpeed, self.hookPosition.y)
+        self.hSprite:moveTo(self.hSprite.x + self.hookSpeed, self.hSprite.y)
     end
 
     -- Handle crank input
