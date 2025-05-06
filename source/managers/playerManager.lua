@@ -12,16 +12,37 @@ function PlayerManager:initialize()
     self.playerState = "idle"
     self.hookState = "idle"
 
-    self.hImage = gfx.image.new("assets/sprites/hook")
-    self.hSprite = gfx.sprite.new(self.hImage)
     self.collisionResponse = gfx.sprite.kCollisionTypeOverlap
+
+    self.hSprite = gfx.sprite.new(gfx.image.new("assets/sprites/hook3"))
     self.hSprite:setCollideRect(0, 0, self.hSprite:getSize())
     self.hSprite:setZIndex(Z_INDEX.PLAYER)
     self.hSprite:setTag(1)
     self.hSprite:add()
 
-    self.pSprite = gfx.image.new("assets/sprites/gup")
-    self.playerPosition = { x = 8, y = 24 }
+    self.pSprite = gfx.sprite.new(gfx.image.new("assets/sprites/gup2"))
+    self.pSprite:setZIndex(Z_INDEX.PLAYER)
+    self.pSprite:add()
+
+    self.rSprite = gfx.sprite.new(gfx.image.new("assets/sprites/rod"))
+    self.rSprite:setZIndex(Z_INDEX.FISH)
+    self.rSprite:add()
+
+    self.bSprite = gfx.sprite.new(gfx.image.new("assets/sprites/boat"))
+    self.bSprite:setZIndex(Z_INDEX.FISH)
+    self.bSprite:add()
+
+    self.playerPosition = { x = 32, y = 76 }
+    self.rodPosition = { x = self.playerPosition.x + 18, y = self.playerPosition.y + 2}
+    self.boatPosition = { x = self.playerPosition.x + 4, y = self.playerPosition.y + 20 }
+    self.hookPosition = { x = self.playerPosition.x + 36, y = self.playerPosition.y + 4 }
+
+    
+
+    self.rSprite:moveTo(self.rodPosition.x, self.rodPosition.y)
+    self.hSprite:moveTo(self.hookPosition.x, self.hookPosition.y)
+    self.pSprite:moveTo(self.playerPosition.x, self.playerPosition.y)
+    self.bSprite:moveTo(self.boatPosition.x, self.boatPosition.y)
 
     self.pMoney = 0
     self.hookInventory = {}
@@ -39,20 +60,14 @@ function PlayerManager:getState()
 end
 
 function PlayerManager:draw()
-    -- Draw Player
-    self.pSprite:draw(self.playerPosition.x, self.playerPosition.y) -- Draw player sprite at its position
-    -- Draw Player's Boat
-    gfx.drawRect(self.playerPosition.x, self.playerPosition.y + 56, 80, 32)
-    if StateManager.currentState == "idle" then
-        self.hSprite:moveTo(self.playerPosition.x + 64, self.playerPosition.y + 16)
-    end
     -- draw fishing line
-    gfx.drawLine(self.playerPosition.x + 64, self.playerPosition.y + 16, self.hSprite.x, self.hSprite.y - 8)
+    gfx.drawLine(self.rodPosition.x + 10, self.rodPosition.y - 8, self.hSprite.x, self.hSprite.y - 8)
 end
 
 function PlayerManager:update()
     if StateManager.currentState == "idle" then
-        self.hSprite.y = self.playerPosition.y
+        -- self.hSprite.y = self.hookPosition.y
+
         if pd.buttonIsPressed(pd.kButtonA) then
             StateManager:setState("casting")
             SoundManager:playSound("cast", 1)

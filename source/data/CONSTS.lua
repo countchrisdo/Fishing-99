@@ -3,7 +3,7 @@ MaxWidth = 400
 
 Z_INDEX = {
     BACKGROUND = 0,
-    FISH = 1,
-    PLAYER = 2,
-    UI = 3
+    FISH = 10,
+    PLAYER = 20,
+    UI = 30
 }

@@ -30,7 +30,7 @@ function CameraManager:draw()
 end
 
 function CameraManager:update()
-    self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 4
+    self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 3
     self:draw()
 end
 

@@ -15,7 +15,7 @@ function UIManager:initialize()
 end
 
 function UIManager:drawUI()
-    gfx.drawTextAligned("Current State: " .. StateManager:getState(), MaxWidth/2, 16, kTextAlignment.center)
+    -- gfx.drawTextAligned("Current State: " .. StateManager:getState(), MaxWidth/2, 16, kTextAlignment.center)
 
     if StateManager:getState() == "idle" then
         gfx.drawTextAligned("Press A to cast", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
