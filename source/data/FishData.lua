@@ -1,7 +1,4 @@
-local pd <const> = playdate
-local gfx <const> = playdate.graphics
-
-FishData = {
+local FISHDATA = {
     {
         name = "Bass",
         value = 10,
@@ -28,13 +25,4 @@ FishData = {
     }
 }
 
--- Function to get fish data
-function FishData:getFishByDepth(depth)
-    local availableFish = {}
-    for _, fish in ipairs(self) do
-        if depth >= fish.depthRange.min and depth <= fish.depthRange.max then
-            table.insert(availableFish, fish)
-        end
-    end
-    return availableFish
-end
+return FISHDATA

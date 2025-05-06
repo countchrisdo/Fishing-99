@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
-import "managers/UIManager"
+-- import "managers/UIManager"
 -- local hookdepth = PlayerManager.hookDepth
 
 CameraManager = {}

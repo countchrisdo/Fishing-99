@@ -4,25 +4,32 @@ local gfx <const> = playdate.graphics
 import "CoreLibs/timer"
 import "CoreLibs/sprites"
 
-import "managers/stateManager"
-import "managers/cameraManager"
-import "managers/playerManager"
-import "data/FishData"
+local FISHDATA = import "data/FISHDATA"
 
 FishManager = {}
 
--- FishManager to handle fish data and interactions
 function FishManager:initialize()
-    self.fishData = FishData
+    self.FISHDATA = FISHDATA
     self.activeFish = {} -- List of spawned fish
-    self.spawnInterval = 2000 -- Time in milliseconds between fish spawns
+    self.spawnInterval = 2000 -- milliseconds between fish spawns
     self.lastSpawnTime = 0
     print("FishManager initialized")
 end
 
+function FishManager:getFishByDepth(depth)
+-- Gets: fish data based on the depth. Returns: list of fish that can spawn at the given depth.
+    local availableFish = {}
+    for _, fish in ipairs(FISHDATA) do
+        if depth >= fish.depthRange.min and depth <= fish.depthRange.max then
+            table.insert(availableFish, fish)
+        end
+    end
+    return availableFish
+end
+
 function FishManager:spawnFish(depth)
     print("Checking if fish can spawn at depth:", depth)
-    local availableFish = self.fishData:getFishByDepth(depth)
+    local availableFish = self:getFishByDepth(depth)
     if #availableFish == 0 then
         print("No fish available at this depth.")
         return
@@ -32,19 +39,15 @@ function FishManager:spawnFish(depth)
     if #availableFish > 0 then
         local fish = availableFish[math.random(#availableFish)]
         local fishImage = gfx.image.new(fish.spritePath)
-        if not fishImage then
-            print("Error: Failed to load fish sprite image at path:", fish.spritePath)
-            return
-        end
 
         local fishSprite = gfx.sprite.new(fishImage)
         fishSprite:setCenter(0.5, 0.5)
+        fishSprite:setSize(32, 32)
+        fishSprite:setCollideRect(0, 0, fishSprite:getSize())
+        fishSprite:setZIndex(Z_INDEX.FISH)
 
-        -- gfx.pushContext()
-        -- gfx.setDrawOffset(0, -CameraManager.cameraPosition.y)
         fishSprite:moveTo(0, CameraManager.cameraPosition.y + math.random(64, 128))
         fishSprite:add()
-        -- gfx.popContext()
 
         fish.ID = math.random(1, 1000) -- Unique ID for the fish
         print("Spawned fish:", fish.name .. " With ID:", fish.ID)
@@ -66,6 +69,7 @@ function FishManager:checkCollisionHook(hookX, hookY)
 
             -- Simple collision detection
             if math.abs(fishX - hookX) < 10 and math.abs(fishY - hookY) < 10 then
+                SoundManager:playSound("catch", 1)
                 self.currentFish = fish.data
                 fish.sprite:remove()
                 table.insert(PlayerManager.hookInventory, fish.data)
@@ -110,8 +114,4 @@ end
 
 function FishManager:reset()
     self.activeFish = nil
-end
-
-function FishManager:getFishByDepth(depth)
-    return self.fishData:getFishByDepth(depth)
 end

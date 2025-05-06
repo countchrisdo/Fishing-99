@@ -5,20 +5,25 @@ import "managers/UIManager"
 import "managers/cameraManager"
 import "managers/fishManager"
 
-PlayerManager = {
-}
--- PlayerManager to handle fishing hook and player states
+PlayerManager = {}
 
 function PlayerManager:initialize()
     self.playerState = "idle"
     self.hookState = "idle"
 
-    self.hSprite = nil -- Placeholder for hook sprite
+    self.hImage = gfx.image.new("assets/sprites/hook")
+    self.hSprite = gfx.sprite.new(self.hImage)
+    self.hSprite:setCenter(0.5, 0.5)
+    self.hSprite:setCollideRect(0, 0, self.hSprite:getSize())
+    self.hSprite:setZIndex(Z_INDEX.PLAYER)
+    
+    self.hSprite:add()
+
     self.hookPosition = { x = 32, y = 32 }
     self.pSprite = gfx.image.new("assets/sprites/gup")
     self.playerPosition = { x = 8, y = 24 }
 
-    self.pMoney = 0 -- Player's money
+    self.pMoney = 0 
     self.hookInventory = {}
     self.hookInventorymax = 3 -- Maximum items on the hook
     self.hookSpeed = 2 -- Speed of the hook movement
@@ -60,6 +65,8 @@ function PlayerManager:update()
         self.hookPosition.y = self.playerPosition.y
         if pd.buttonIsPressed(pd.kButtonA) then
             StateManager:setState("casting")
+            SoundManager:playSound("cast", 1)
+            SoundManager:playSound("reel", 2)
             print("Casting hook...")
         end
     elseif StateManager.currentState == "casting" then
@@ -77,6 +84,10 @@ function PlayerManager:update()
         -- Stop moving when the hook reaches the target position
         if self.hookPosition.x == targetX and self.hookPosition.y == targetY then
             print("Hook reached the center of the screen.")
+
+            -- Play this sound when hook collides with the water
+            -- SoundManager:playSound("splash", 1)
+
             StateManager:setState("fishing")
         end
 
@@ -89,12 +100,9 @@ function PlayerManager:update()
 
     elseif StateManager.currentState == "fishing" then
         self:handleInput()
-        -- Check for fish collision
         FishManager:checkCollisionHook(self.hookPosition.x, self.hookPosition.y)
 
-        -- Check if the hook is full
         if #self.hookInventory >= self.hookInventorymax then
-            -- If the hook is full, switch to reeling state
             StateManager:setState("reeling")
             print("Hook is full, reeling in...")
         end
@@ -113,6 +121,7 @@ function PlayerManager:update()
                 print("Caught fish value:", self.hookInventory[i].value)
             end
             print("Total money:", self.pMoney)
+            SoundManager:playSound("cash", 3)
             -- Clear the hook inventory
             self.hookInventory = {}
             StateManager:setState("idle")
