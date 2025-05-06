@@ -4,6 +4,7 @@ local gfx <const> = playdate.graphics
 import "managers/UIManager"
 import "managers/cameraManager"
 import "managers/fishManager"
+import "CoreLibs/sprites"
 
 PlayerManager = {}
 
@@ -13,20 +14,22 @@ function PlayerManager:initialize()
 
     self.hImage = gfx.image.new("assets/sprites/hook")
     self.hSprite = gfx.sprite.new(self.hImage)
-    self.hSprite:setCenter(0.5, 0.5)
+    self.collisionResponse = gfx.sprite.kCollisionTypeOverlap
     self.hSprite:setCollideRect(0, 0, self.hSprite:getSize())
     self.hSprite:setZIndex(Z_INDEX.PLAYER)
-    
+    self.hSprite:setTag(1)
+    -- self.hSprite:setGroups(1)
+
     self.hSprite:add()
 
     -- self.hookPosition = { x = 32, y = 32 }
     self.pSprite = gfx.image.new("assets/sprites/gup")
     self.playerPosition = { x = 8, y = 24 }
 
-    self.pMoney = 0 
+    self.pMoney = 0
     self.hookInventory = {}
     self.hookInventorymax = 3 -- Maximum items on the hook
-    self.hookSpeed = 2 -- Speed of the hook movement
+    self.hookSpeed = 2
     self.depth = 0 -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
     self.depthMax = 1000 -- Maximum depth
 end
@@ -61,7 +64,7 @@ function PlayerManager:update()
         end
     elseif StateManager.currentState == "casting" then
         -- Move the hook towards the center of the screen
-        local targetX = MaxWidth / 2 - 2.5 -- Center of the screen minus half the hook width
+        local targetX = MaxWidth / 2
         local targetY = MaxHeight / 2 + 130 -- Center of the screen plus some offset
 
         if self.hSprite.x < targetX then
@@ -90,7 +93,30 @@ function PlayerManager:update()
 
     elseif StateManager.currentState == "fishing" then
         self:handleInput()
-        FishManager:checkCollisionHook(self.hSprite.x, self.hSprite.y)
+        -- FishManager:checkCollisionHook(self.hSprite.x, self.hSprite.y)
+        -- Switch to using built in checkCollisions function 
+        local collisions = self.hSprite:overlappingSprites()
+        for i, sprite in ipairs(collisions) do
+            if sprite:getTag() == 2 then -- Assuming fish sprites have tag 2
+                print("Collision with fish detected!")
+                
+                local curFish = nil
+                for idx = 1, #FishManager.activeFish do
+                    if FishManager.activeFish[idx].sprite == sprite then
+                        curFish = FishManager.activeFish[idx].data
+                        FishManager.activeFish[idx].sprite:remove()
+                        table.insert(self.hookInventory, curFish)
+                        table.remove(FishManager.activeFish, idx)
+                        sprite:remove()
+                        print("Caught fish:", curFish.name)
+                        SoundManager:playSound("catch", 1)
+                        break
+                    end
+                end
+            end
+        end
+
+
 
         if #self.hookInventory >= self.hookInventorymax then
             StateManager:setState("reeling")
@@ -108,10 +134,12 @@ function PlayerManager:update()
             -- Add the value of the caught fish to the player's money
             for i = 1, #self.hookInventory do
                 self.pMoney = self.pMoney + self.hookInventory[i].value
+                print("Caught fish:", self.hookInventory[i].name)
                 print("Caught fish value:", self.hookInventory[i].value)
+                SoundManager:playSound("cash", 1)
             end
             print("Total money:", self.pMoney)
-            SoundManager:playSound("cash", 3)
+            -- SoundManager:playSound("cash", 3)
             -- Clear the hook inventory
             self.hookInventory = {}
             StateManager:setState("idle")

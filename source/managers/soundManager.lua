@@ -15,7 +15,13 @@ function SoundManager:initialize()
     }
 end
 function SoundManager:playSound(soundName, plays)
+
     if self.sounds[soundName] then
+
+        if soundName == "cash" then
+            self.sounds[soundName]:setVolume(0.5) -- Set volume for cash sound
+        end
+
         self.sounds[soundName]:play(plays)
         print("Playing sound:", soundName)
     else

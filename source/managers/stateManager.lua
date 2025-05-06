@@ -1,9 +1,9 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
--- StateManager to track game states
+
 StateManager = {
     currentState = "idle",
-    states = { "idle", "casting", "fishing", "reeling" }
+    states = { "idle", "casting", "fishing", "reeling" },
 }
 -- Idle: player is ready to cast the fishing line
 -- Casting: player is casting the fishing line
@@ -26,10 +26,24 @@ function StateManager:getState()
     return self.currentState
 end
 
-function StateManager:update()
-    -- Logic to handle state-specific updates can go here
-end
-
-function pd.update()
-    StateManager:update()
+-- Communitcation with Console
+function pd.serialMessageReceived(message)
+    print("Message received:", message)
+    if message == "cast" then
+        StateManager:setState("casting")
+        SoundManager:playSound("cast", 1)
+        SoundManager:playSound("reel", 2)
+        print("Casting hook...")
+    elseif message == "reel" then
+        StateManager:setState("reeling")
+        SoundManager:playSound("reel", 2)
+        print("Reeling in fish...")
+    elseif message == "catch" then
+        SoundManager:playSound("catch", 1)
+        local fish = FishManager:getRandomFish()
+        PlayerManager.hookInventory[#PlayerManager.hookInventory + 1] = fish
+        print("Fish caught:", fish)
+    else
+        print("Unknown Command")
+    end
 end

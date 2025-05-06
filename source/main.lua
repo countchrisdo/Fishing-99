@@ -22,7 +22,6 @@ SoundManager:initialize()
 -- SoundManager:playBGM()
 
 function pd.update()
-    StateManager:update()
     gfx.clear()
 
     PlayerManager:update()
