@@ -1,53 +1,57 @@
+-- Contains: PlayerManager{} and Compendium{}
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
-
-import "managers/UIManager"
-import "managers/cameraManager"
-import "managers/fishManager"
 import "CoreLibs/sprites"
 
-PlayerManager = {}
+PlayerManager = {
+    state = "inactive",
+    states = { "inactive", "active"},
+    pMoney = 0,
+    hookInventory = {},
+    hookInventorymax = 3, -- Maximum items on the hook
+    hookSpeed = 2,
+    depth = 0, -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
+    depthMax = 1000, -- Maximum depth
+}
 
 function PlayerManager:initialize()
-    self.playerState = "idle"
-    self.hookState = "idle"
-
+    print("PlayerManager initialized")
+    self.state = "active"
     self.collisionResponse = gfx.sprite.kCollisionTypeOverlap
 
-    self.hSprite = gfx.sprite.new(gfx.image.new("assets/sprites/hook3"))
-    self.hSprite:setCollideRect(0, 0, self.hSprite:getSize())
+    self.hSprite = gfx.sprite.new(gfx.image.new("assets/sprites/hook2"))
+    self.hSprite:setScale(2)
+    self.hSprite:setCollideRect(0, 8, 16, 10)
     self.hSprite:setZIndex(Z_INDEX.PLAYER)
     self.hSprite:setTag(1)
     self.hSprite:add()
 
     self.pSprite = gfx.sprite.new(gfx.image.new("assets/sprites/gup2"))
+    self.pSprite:setScale(2)
     self.pSprite:setZIndex(Z_INDEX.PLAYER)
     self.pSprite:add()
 
     self.rSprite = gfx.sprite.new(gfx.image.new("assets/sprites/rod"))
+    self.rSprite:setScale(2)
     self.rSprite:setZIndex(Z_INDEX.FISH)
     self.rSprite:add()
 
     self.bSprite = gfx.sprite.new(gfx.image.new("assets/sprites/boat"))
     self.bSprite:setZIndex(Z_INDEX.FISH)
+    self.bSprite:setScale(2)
     self.bSprite:add()
 
-    self.playerPosition = { x = 32, y = 76 }
-    self.rodPosition = { x = self.playerPosition.x + 18, y = self.playerPosition.y + 2}
-    self.boatPosition = { x = self.playerPosition.x + 4, y = self.playerPosition.y + 20 }
-    self.hookPosition = { x = self.playerPosition.x + 36, y = self.playerPosition.y + 4 }
+    self.playerPosition = { x = 64, y = 56 }
+    self.rodPosition = { x = self.playerPosition.x + 42, y = self.playerPosition.y + 0}
+    self.boatPosition = { x = self.playerPosition.x + 4, y = self.playerPosition.y + 40 }
+    self.hookPosition = { x = self.playerPosition.x + 64, y = self.playerPosition.y + -2 }
 
     self.rSprite:moveTo(self.rodPosition.x, self.rodPosition.y)
     self.hSprite:moveTo(self.hookPosition.x, self.hookPosition.y)
     self.pSprite:moveTo(self.playerPosition.x, self.playerPosition.y)
     self.bSprite:moveTo(self.boatPosition.x, self.boatPosition.y)
 
-    self.pMoney = 0
-    self.hookInventory = {}
-    self.hookInventorymax = 3 -- Maximum items on the hook
-    self.hookSpeed = 2
-    self.depth = 0 -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
-    self.depthMax = 1000 -- Maximum depth
+    self.depth = 0
 end
 
 Compendium = {
@@ -68,19 +72,29 @@ function Compendium:updateFishCount(fish)
 end
 
 function PlayerManager:draw()
+    if self.state == "inactive" then
+        return
+    end
     -- draw fishing line
-    gfx.drawLine(self.rodPosition.x + 10, self.rodPosition.y - 8, self.hSprite.x, self.hSprite.y - 8)
+    gfx.drawLine(self.rodPosition.x + 15, self.rodPosition.y - 12, self.hSprite.x, self.hSprite.y - 10)
 end
 
 function PlayerManager:update()
+
     if StateManager.currentState == "idle" then
         -- self.hSprite.y = self.hookPosition.y
 
-        if pd.buttonIsPressed(pd.kButtonA) then
+        if pd.buttonJustPressed(pd.kButtonA) then
+            print("A button pressed, casting hook...")
             StateManager:setState("casting")
             SoundManager:playSound("cast", 1)
             SoundManager:playSound("reel", 2)
-            print("Casting hook...")
+        end
+
+        if pd.buttonIsPressed(pd.kButtonB) then
+            StateManager:setState("shopping")
+            -- Bring up Shopping menu
+
         end
     elseif StateManager.currentState == "casting" then
         -- Move the hook towards the center of the screen
@@ -108,7 +122,7 @@ function PlayerManager:update()
         if self.depth < 125 then
             self.depth = self.depth + 2
             CameraManager:moveCamera(self.depth)
-            print("Depth adjusted to:", self.depth)
+            -- print("MoveCamera Called by PlayerManager at Depth:", self.depth)
         end
 
     elseif StateManager.currentState == "fishing" then
@@ -118,6 +132,7 @@ function PlayerManager:update()
             if sprite:getTag() == 2 then -- Tag 2 = Fish
                 print("Collision with fish detected!")
                 local curFish = nil
+                -- Add a Fishing Cooldown here?
                 for idx = 1, #FishManager.activeFish do
                     if FishManager.activeFish[idx].sprite == sprite then
                         curFish = FishManager.activeFish[idx].data
@@ -154,7 +169,7 @@ function PlayerManager:update()
             self.depth = self.depth - 2
             self.hSprite:moveTo( self.hSprite.x, CameraManager.cameraPosition.y + 64)
             CameraManager:moveCamera(self.depth)
-            print("Depth adjusted to:", self.depth)
+            -- print("Depth adjusted to:", self.depth)
         else
             -- Hook has reached the player
             -- Add the value of the caught fish to the player's money
@@ -165,7 +180,7 @@ function PlayerManager:update()
                 SoundManager:playSound("cash", 1)
             end
             print("Total money:", self.pMoney)
-            -- SoundManager:playSound("cash", 3)
+            -- SoundManager:playSound("cash", 1)
             -- Clear the hook inventory
             self.hookInventory = {}
             StateManager:setState("idle")
@@ -224,11 +239,9 @@ function PlayerManager:handleInput()
     end
 end
 function PlayerManager:reset()
-    -- Reset player state and position
-    self.playerState = "idle"
-    self.playerPosition = { x = 0, y = 0 }
-    self.playerInventory = {}
-    print("Player reset to initial state.")
+    -- Reset player state and position to defaults
+    self.hSprite:moveTo(self.hookPosition.x, self.hookPosition.y)
+
 end
 -- function PlayerManager:saveState()
 --     -- Save player state to a file or database

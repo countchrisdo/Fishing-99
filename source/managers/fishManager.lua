@@ -11,7 +11,19 @@ local corruptedFishImg = gfx.imagetable.new("assets/sprites/fish/corrupt-table-2
 local corruptedFishAnim = gfx.animation.loop.new(100, corruptedFishImg, true)
 
 
-FishManager = {}
+FishManager = {
+    FISHDATA = FISHDATA1,
+    state = "inactive",
+    states = { "inactive", "active" },
+    activeFish = {}, -- List of spawned fish
+    spawnInterval = 2000, -- milliseconds between fish spawns
+    lastSpawnTime = 0,
+}
+
+function FishManager:initialize()
+    self.state = "active"
+end
+
 
 --[[
 setAnimator()
@@ -21,13 +33,6 @@ movesWithCollisions, if provided and true will cause the sprite to move with col
 removeOnCollision, if provided and true will cause the animator to be removed from the sprite when a collision occurs.
 ]]
 
-function FishManager:initialize()
-    self.FISHDATA = FISHDATA1
-    self.activeFish = {} -- List of spawned fish
-    self.spawnInterval = 2000 -- milliseconds between fish spawns
-    self.lastSpawnTime = 0
-    print("FishManager initialized")
-end
 
 function FishManager:getFishByDepth(depth)
 -- Returns: list of fish that can spawn at the given depth.
@@ -46,6 +51,11 @@ function FishManager:getRandomFish()
 end
 
 function FishManager:spawnFish(depth)
+    if self.state == "inactive" then
+        print("FishManager is inactive. Cannot spawn fish.")
+        return
+    end
+
     print("Checking if fish can spawn at depth:", depth)
     local availableFish = self:getFishByDepth(depth)
     if #availableFish == 0 then
@@ -79,6 +89,9 @@ function FishManager:spawnFish(depth)
                 fishSprite:setImage(corruptedFishAnim:image())
             end
         end
+
+        fishSprite:setScale(2)
+
         fishSprite:setCollideRect(0, 0, fishSprite:getSize())
         fishSprite:setZIndex(Z_INDEX.FISH)
         fishSprite:setTag(2)

@@ -14,13 +14,9 @@ WorldManager = {
         day = { start = 6 * HTM, stop = 18 },
         dusk = { start = 18 * HTM, stop = 19 * HTM},
         night = { start = 19 * HTM, stop = 5 * HTM }
-    }
+    },
+    currentTime = 6 * MTM, -- Current time in milliseconds
 }
-
-function WorldManager:initialize()
-    self.currentTime = 6 * MTM -- Current time in milliseconds
-    self.timeOfDay = "day" -- Current time of day (day, night, etc.)
-end
 
 function WorldManager:update()
     -- Update the current time based on the time scale

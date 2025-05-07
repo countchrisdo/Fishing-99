@@ -2,11 +2,13 @@ local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
 StateManager = {
-    currentState = "idle",
-    states = { "idle", "casting", "fishing", "reeling" },
+    currentState = "main menu", --Set this to idle to skip the main menu
+    states = { "main menu", "idle", "shopping", "casting", "fishing", "reeling" },
 }
+
 -- Idle: player is ready to cast the fishing line
 -- Casting: player is casting the fishing line
+-- Shopping: player is in the shop to buy items
 -- Fishing: player can now move the hook to collide with a fish to catch it
 -- Reeling: player hit the max number of fish on the hook [hookInventorymax] and is reeling them in to reset to idle state
 
@@ -24,26 +26,4 @@ end
 
 function StateManager:getState()
     return self.currentState
-end
-
--- Communitcation with Console
-function pd.serialMessageReceived(message)
-    print("Message received:", message)
-    if message == "cast" then
-        StateManager:setState("casting")
-        SoundManager:playSound("cast", 1)
-        SoundManager:playSound("reel", 2)
-        print("Casting hook...")
-    elseif message == "reel" then
-        StateManager:setState("reeling")
-        SoundManager:playSound("reel", 2)
-        print("Reeling in fish...")
-    elseif message == "catch" then
-        SoundManager:playSound("catch", 1)
-        local fish = FishManager:getRandomFish()
-        PlayerManager.hookInventory[#PlayerManager.hookInventory + 1] = fish
-        print("Fish caught:", fish)
-    else
-        print("Unknown Command")
-    end
 end

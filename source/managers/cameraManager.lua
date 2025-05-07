@@ -1,16 +1,18 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
--- import "managers/UIManager"
--- local hookdepth = PlayerManager.hookDepth
-
-CameraManager = {}
+CameraManager = {
+    cameraSpeed = 2, -- Speed of camera movement
+    WaterY = 64, -- Initial water level
+    cameraPosition = { x = 0, y = 0 }
+}
+print("CameraManager Loaded")
+print(CameraManager.cameraPosition.y)
 
 -- CameraManager to handle camera positioning and movement
 function CameraManager:initialize()
-    self.cameraPosition = { x = 0, y = 0 }
-    self.cameraSpeed = 2 -- Speed of camera movement
-    self.WaterY = 64 -- Initial water level
+    self.cameraPosition.x = 0
+    self.cameraPosition.y = 0
 end
 
 function CameraManager:moveCamera(depth)
@@ -19,9 +21,12 @@ function CameraManager:moveCamera(depth)
 end
 
 function CameraManager:draw()
+    -- if not self.cameraPosition.y then
+    --     self.cameraPosition.y = 0
+    -- end
+
     gfx.pushContext()
     gfx.setDrawOffset(0, -self.cameraPosition.y)  -- Adjust y offset based on camera position
-    
     -- Draw the game world here
     gfx.sprite.update()
     PlayerManager:draw()
@@ -30,7 +35,13 @@ function CameraManager:draw()
 end
 
 function CameraManager:update()
-    self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 3
+    -- if the player is not in the store or main menu, update the water level
+    if StateManager:getState() ~= "shopping" and StateManager:getState() ~= "main menu" then
+        self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 3
+    else
+        self.WaterY = 0
+    end
+
     self:draw()
 end
 
