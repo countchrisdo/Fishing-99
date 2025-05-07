@@ -19,13 +19,14 @@ function UIManager:drawUI()
 
     if StateManager:getState() == "idle" then
         gfx.drawTextAligned("Press A to cast", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
-        gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 30, kTextAlignment.right)
+        gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)
+        gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 50, kTextAlignment.right)
     end
 
     if StateManager:getState() ~= "idle" then
-        gfx.drawTextAligned("Depth:"..PlayerManager.depth, MaxWidth-16, 30, kTextAlignment.right)
-        gfx.drawTextAligned("Fish caught: " .. #PlayerManager.hookInventory .. "/" .. PlayerManager.hookInventorymax, MaxWidth-16, 50, kTextAlignment.right)
-        gfx.drawTextAligned("Time: TBD", MaxWidth-16, 70, kTextAlignment.right)
+        gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)
+        gfx.drawTextAligned("Depth:"..PlayerManager.depth, MaxWidth-16, 50, kTextAlignment.right)
+        gfx.drawTextAligned("Fish caught: " .. #PlayerManager.hookInventory .. "/" .. PlayerManager.hookInventorymax, MaxWidth-16, 70, kTextAlignment.right)
     end
 end
 

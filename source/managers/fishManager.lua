@@ -122,12 +122,12 @@ function FishManager:updateFish()
     end
 end
 
-function FishManager:updateData(curfish)
+function FishManager:markDiscovered(curfish)
     -- Update fish data to mark it as discovered
     for i, fish in ipairs(self.FISHDATA) do
-        if fish.ID == curfish.ID then
+        if fish.name == curfish.name then
             fish.discovered = true
-            print("Fish data updated:", fish.name)
+            print("Fish data updated: Discovered ", fish.name)
             break
         end
     end

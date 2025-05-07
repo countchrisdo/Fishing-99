@@ -37,8 +37,6 @@ function PlayerManager:initialize()
     self.boatPosition = { x = self.playerPosition.x + 4, y = self.playerPosition.y + 20 }
     self.hookPosition = { x = self.playerPosition.x + 36, y = self.playerPosition.y + 4 }
 
-    
-
     self.rSprite:moveTo(self.rodPosition.x, self.rodPosition.y)
     self.hSprite:moveTo(self.hookPosition.x, self.hookPosition.y)
     self.pSprite:moveTo(self.playerPosition.x, self.playerPosition.y)
@@ -123,11 +121,11 @@ function PlayerManager:update()
                 for idx = 1, #FishManager.activeFish do
                     if FishManager.activeFish[idx].sprite == sprite then
                         curFish = FishManager.activeFish[idx].data
-                        
+
                         if curFish.discovered == false then
                             Compendium:addFish(curFish)
-                            FishManager:updateData(curFish)
-                            print("Fish data updated:", curFish.name)
+                            FishManager:markDiscovered(curFish)
+                            print("New Fish Discovered:", curFish.name)
                         end
 
                         Compendium:updateFishCount(curFish)

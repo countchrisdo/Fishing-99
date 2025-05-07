@@ -6,12 +6,14 @@ import "managers/UIManager"
 import "managers/playerManager"
 import "managers/cameraManager"
 import "managers/fishManager"
+import "managers/worldManager"
 import "managers/soundManager"
 
 import "data/CONSTS"
 
 
 -- Initialize managers
+WorldManager:initialize()
 PlayerManager:initialize()
 FishManager:initialize()
 UIManager:initialize()
@@ -23,6 +25,9 @@ SoundManager:initialize()
 
 function pd.update()
     gfx.clear()
+
+    WorldManager:update()
+    pd.timer.updateTimers()
 
     PlayerManager:update()
     FishManager:update()
