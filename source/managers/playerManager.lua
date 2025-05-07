@@ -6,7 +6,7 @@ import "CoreLibs/sprites"
 PlayerManager = {
     state = "inactive",
     states = { "inactive", "active"},
-    pMoney = 0,
+    pMoney = 1000, -- test value
     hookInventory = {},
     hookInventorymax = 3, -- Maximum items on the hook
     hookSpeed = 2,
@@ -72,11 +72,11 @@ function Compendium:updateFishCount(fish)
 end
 
 function PlayerManager:draw()
-    if self.state == "inactive" then
-        return
-    end
     -- draw fishing line
-    gfx.drawLine(self.rodPosition.x + 15, self.rodPosition.y - 12, self.hSprite.x, self.hSprite.y - 10)
+    if StateManager:getState() ~= "shopping" and StateManager:getState() ~= "main menu" then
+        gfx.drawLine(self.rodPosition.x + 15, self.rodPosition.y - 12, self.hSprite.x, self.hSprite.y - 10)
+    end
+    
 end
 
 function PlayerManager:update()
@@ -93,7 +93,13 @@ function PlayerManager:update()
 
         if pd.buttonIsPressed(pd.kButtonB) then
             StateManager:setState("shopping")
-            -- Bring up Shopping menu
+            ShoppingMenu:show()
+            print("B button pressed, opening shopping menu...")
+            -- remove player sprite
+            self.pSprite:remove()
+            self.rSprite:remove()
+            self.bSprite:remove()
+            self.hSprite:remove()
 
         end
     elseif StateManager.currentState == "casting" then

@@ -4,6 +4,7 @@ local gfx <const> = playdate.graphics
 import "managers/stateManager"
 import "managers/storeManager"
 import "managers/UIManager"
+import "managers/mainMenu"
 import "managers/playerManager"
 import "managers/cameraManager"
 import "managers/fishManager"
@@ -19,7 +20,6 @@ function LoadToMenu()
     UIManager:initialize()
     MainMenu:initialize()
     SoundManager:initialize()
-    ShoppingMenu:initialize()
 end
 
 function LoadToGame()
