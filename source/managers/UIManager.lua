@@ -3,8 +3,10 @@ local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
 import "CoreLibs/graphics"
+import "CoreLibs/timer"
 import "CoreLibs/sprites"
 import "CoreLibs/UI"
+import"CoreLibs/nineslice"
 
 import "managers/stateManager"
 import "managers/playerManager"
@@ -12,24 +14,39 @@ import "managers/playerManager"
 UIManager = {
     state = "inactive",
     states = { "inactive", "active"},
+    BgImg = gfx.image.new("assets/sprites/menubg"),
+    gridBackground = gfx.nineSlice.new("assets/sprites/gridbackground", 7, 7, 18, 18),
 }
 -- UIManager to handle UI elements and interactions
 function UIManager:initialize()
-    BgImg = gfx.image.new("assets/sprites/menubg")
+    self.state = "active"
+    gfx.setFontFamily(gfx.getFont(gfx.font.kVariantBold))
+    print("UIManager initialized")
 end
 
 MainMenu = {}
 function MainMenu:initialize()
-
     if StateManager:getState() == "main menu" then
         local spriteBG = gfx.sprite.new(UIManager.BgImg)
-        local spriteTitle = gfx.sprite.spriteWithText("Fish Fear Me: 99", MaxWidth, MaxHeight)
+        local spriteTitle = gfx.sprite.new()
         local spriteButton = gfx.sprite.spriteWithText("Press A to start", MaxWidth, MaxHeight)
 
-        spriteBG:moveTo(100, 200)
-        spriteTitle:moveTo(MaxWidth/2, 120)
+        local imageSpriteTitle = gfx.image.new(400, 240)
+
+        -- gfx.setFontFamily(gfx.getFont(gfx.font.kVariantBold))
+
+        -- Draw text on the image
+        gfx.pushContext(imageSpriteTitle)
+            gfx.drawTextAligned("Main Menu", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
+        
+        gfx.popContext()
+
+        spriteTitle:setImage(imageSpriteTitle:scaledImage(2))
+
+        spriteBG:moveTo(MaxWidth/2, MaxHeight/2)
+        spriteTitle:moveTo(MaxWidth/2, 64)
         spriteButton:moveTo(MaxWidth/2, 170)
-        spriteBG:setZIndex(Z_INDEX.BACKGROUND)
+        spriteBG:setZIndex(Z_INDEX.UI)
         spriteTitle:setZIndex(Z_INDEX.UI)
         spriteButton:setZIndex(Z_INDEX.UI)
 
@@ -52,6 +69,8 @@ function MainMenu:update()
         end
     end
 end
+
+
 
 function UIManager:drawUI()
     -- gfx.drawTextAligned("Current State: " .. StateManager:getState(), MaxWidth/2, 16, kTextAlignment.center)

@@ -11,7 +11,6 @@ import "managers/worldManager"
 import "managers/soundManager"
 
 import "data/CONSTS"
-print("main.lua imports loaded")
 
 function LoadToMenu()
     print("Running: LoadToMenu() in main.lua")
@@ -20,6 +19,7 @@ function LoadToMenu()
     UIManager:initialize()
     MainMenu:initialize()
     SoundManager:initialize()
+    ShoppingMenu:initialize()
 end
 
 function LoadToGame()
@@ -27,20 +27,22 @@ function LoadToGame()
     gfx.sprite.removeAll()
     gfx.clear()
 
+    StateManager:setState("idle")
     PlayerManager:initialize()
     CameraManager:initialize()
     FishManager:initialize()
-    SoundManager:initialize()
-    StateManager:setState("idle")
     UIManager:initialize()
+    ShoppingMenu:initialize()
+    SoundManager:initialize()
 end
 
--- LoadToMenu()
-LoadToGame()
+LoadToMenu()
+-- LoadToGame()
 
 -- not playing yet to test sfx, remember to renable BGMswitch too
 -- SoundManager:playBGM()
 
+-- One day you need to clean up this of an update loop
 function pd.update()
     gfx.clear()
     -- gfx.sprite.update()
@@ -52,7 +54,7 @@ function pd.update()
     CameraManager:update()
     UIManager:update()
     MainMenu:update()
-    
+    ShoppingMenu:update()
 end
 
 -- Communitcation with Console

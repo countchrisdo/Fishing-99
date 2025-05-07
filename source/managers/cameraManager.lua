@@ -30,17 +30,16 @@ function CameraManager:draw()
     -- Draw the game world here
     gfx.sprite.update()
     PlayerManager:draw()
-    gfx.drawLine(0, 64+self.WaterY, MaxWidth, 64+self.WaterY) -- Water surface line
+    if StateManager:getState() ~= "shopping" and StateManager:getState() ~= "main menu" then
+        gfx.drawLine(0, 64+self.WaterY, MaxWidth, 64+self.WaterY) -- Water surface line
+    end
     gfx.popContext()
 end
 
 function CameraManager:update()
     -- if the player is not in the store or main menu, update the water level
-    if StateManager:getState() ~= "shopping" and StateManager:getState() ~= "main menu" then
-        self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 3
-    else
-        self.WaterY = 0
-    end
+    
+    self.WaterY = 32 + math.sin(playdate.getCurrentTimeMilliseconds() / 500) * 3
 
     self:draw()
 end
