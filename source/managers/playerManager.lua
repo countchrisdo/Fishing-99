@@ -51,12 +51,22 @@ function PlayerManager:initialize()
     self.depth = 0 -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
     self.depthMax = 1000 -- Maximum depth
 end
-function PlayerManager:setState(newState)
-    self.playerState = newState
-    print("Player state changed to:", newState)
+
+Compendium = {
+    fishList = {}
+}
+function Compendium:addFish(fish)
+    if not self.fishList[fish.name] then
+        self.fishList[fish.name] = fish
+        print("New fish discovered:", fish.name)
+    end
 end
-function PlayerManager:getState()
-    return self.playerState
+
+function Compendium:updateFishCount(fish)
+    if self.fishList[fish.name] then
+        self.fishList[fish.name].count = (self.fishList[fish.name].count or 0) + 1
+        print("Fish count updated:", fish.name, "Count:", self.fishList[fish.name].count)
+    end
 end
 
 function PlayerManager:draw()
@@ -107,14 +117,24 @@ function PlayerManager:update()
         self:handleInput()
         local collisions = self.hSprite:overlappingSprites()
         for i, sprite in ipairs(collisions) do
-            if sprite:getTag() == 2 then -- Assuming fish sprites have tag 2
+            if sprite:getTag() == 2 then -- Tag 2 = Fish
                 print("Collision with fish detected!")
                 local curFish = nil
                 for idx = 1, #FishManager.activeFish do
                     if FishManager.activeFish[idx].sprite == sprite then
                         curFish = FishManager.activeFish[idx].data
+                        
+                        if curFish.discovered == false then
+                            Compendium:addFish(curFish)
+                            FishManager:updateData(curFish)
+                            print("Fish data updated:", curFish.name)
+                        end
+
+                        Compendium:updateFishCount(curFish)
+
                         FishManager.activeFish[idx].sprite:remove()
                         table.insert(self.hookInventory, curFish)
+
                         table.remove(FishManager.activeFish, idx)
                         sprite:remove()
                         print("Caught fish:", curFish.name)
@@ -171,7 +191,7 @@ function PlayerManager:handleInput()
     -- Handle crank input
     if pd.isCrankDocked() == false then
         local crankChange = pd.getCrankChange()
-        self.depth = math.floor(self.depth + crankChange)
+        self.depth = math.floor(self.depth + (crankChange / 2))
 
         if self.depth < 0 then
             self.depth = 0

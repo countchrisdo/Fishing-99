@@ -4,8 +4,11 @@ local gfx <const> = playdate.graphics
 import "CoreLibs/timer"
 import "CoreLibs/sprites"
 import "CoreLibs/object"
+import "CoreLibs/animation"
 
 local FISHDATA1 = import "data/FISHDATA"
+local corruptedFishImg = gfx.imagetable.new("assets/sprites/fish/corrupt-table-22-20")
+local corruptedFishAnim = gfx.animation.loop.new(100, corruptedFishImg, true)
 
 
 FishManager = {}
@@ -53,23 +56,35 @@ function FishManager:spawnFish(depth)
 
     if #availableFish > 0 then
         local fish = availableFish[math.random(#availableFish)]
-        local fishImage = gfx.image.new(fish.spritePath)
+        local fishImage = nil
+        if fish.discovered then
+            print("Known Fish Spawn:", fish.name)
+            fishImage = gfx.image.new(fish.spritePath)
+        else
+            print("Unknown Fish Spawn:", fish.name)
+            fishImage = corruptedFishAnim:image()
+        end
+
+
         if not fishImage then
             print("Failed to load fish image:", fish.spritePath)
             return
         end
 
         local fishSprite = gfx.sprite.new(fishImage)
-        fishSprite:setCenter(0.5, 0.5)
+        fishSprite.update = function()
+            if fish.discovered then
+                fishSprite:setImage(fishImage)
+            else
+                fishSprite:setImage(corruptedFishAnim:image())
+            end
+        end
         fishSprite:setCollideRect(0, 0, fishSprite:getSize())
         fishSprite:setZIndex(Z_INDEX.FISH)
         fishSprite:setTag(2)
 
         fishSprite:moveTo(0, CameraManager.cameraPosition.y + math.random(64, 128))
         fishSprite:add()
-
-        fish.ID = math.random(1, 1000) -- Unique ID for the fish
-        print("Spawned fish:", fish.name .. " With ID:", fish.ID)
 
         table.insert(self.activeFish, {
             sprite = fishSprite,
@@ -107,6 +122,13 @@ function FishManager:updateFish()
     end
 end
 
-function FishManager:reset()
-    self.activeFish = nil
+function FishManager:updateData(curfish)
+    -- Update fish data to mark it as discovered
+    for i, fish in ipairs(self.FISHDATA) do
+        if fish.ID == curfish.ID then
+            fish.discovered = true
+            print("Fish data updated:", fish.name)
+            break
+        end
+    end
 end
