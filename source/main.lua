@@ -48,6 +48,10 @@ function pd.gameWillTerminate()
     PlayerManager:saveState()
 end
 
+function pd.gameWillPause()
+    PlayerManager:saveState()
+end
+
 -- Load player state on game start
 PlayerManager:loadState()
 

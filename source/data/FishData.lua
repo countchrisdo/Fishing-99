@@ -83,7 +83,7 @@ local FISHDATA = {
         name = "Golden Fish",
         value = 100,
         depthRange = { min = 500, max = 1000 },
-        spritePath = "assets/sprites/fish",
+        spritePath = "assets/sprites/fish/goldenfish",
         discovered = false,
         spawnTime = {"dawn", "dusk"},
         description = "A shiny CD that seems to have been lost in the depths.",

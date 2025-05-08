@@ -169,6 +169,8 @@ function PlayerManager:update()
                         table.remove(FishManager.activeFish, idx)
                         sprite:remove()
                         print("Caught fish:", curFish.name)
+                        print("Fish value:", curFish.value)
+                        UIManager:textAtFish(curFish.value * self.baitQuality, self.hSprite.x, self.hSprite.y)
                         SoundManager:playSound("catch", 1)
                         break
                     end
@@ -284,7 +286,6 @@ function PlayerManager:loadState()
     local playerData = SaveManager:loadPlayerData()
     if playerData then
         self.pMoney = playerData.pMoney or self.pMoney
-        self.depth = playerData.depth or self.depth
         self.hookInventory = playerData.hookInventory or {}
         self.depthMax = playerData.upgrades.depthMax or self.baseDepthMax
         self.hookInventorymax = playerData.upgrades.hookInventorymax or self.baseHookInventorymax

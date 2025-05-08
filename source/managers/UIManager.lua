@@ -6,10 +6,14 @@ import "CoreLibs/graphics"
 import "CoreLibs/timer"
 import "CoreLibs/sprites"
 import "CoreLibs/UI"
-import"CoreLibs/nineslice"
+import "CoreLibs/nineslice"
+import "CoreLibs/animation"
+
 
 import "managers/stateManager"
 import "managers/playerManager"
+
+
 
 UIManager = {
     state = "inactive",
@@ -50,6 +54,71 @@ function UIManager:drawUI()
         gfx.drawTextAligned("Depth:"..PlayerManager.depth, MaxWidth-16, 50, kTextAlignment.right)
         gfx.drawTextAligned("Fish caught: " .. #PlayerManager.hookInventory .. "/" .. PlayerManager.hookInventorymax, MaxWidth-16, 70, kTextAlignment.right)
     end
+end
+
+function UIManager:textAtFish(message, x, y)
+    -- Draws the value of the fish at the given coordinates
+    local rndOffset = math.random(-4, 4)
+
+    local sprite = gfx.sprite.new()
+    local image= gfx.image.new(64, 32)
+    gfx.pushContext(image)
+        gfx.drawText("+$"..message, 16, 16)
+        -- gfx.drawTextAligned(("Fish caught!"), 16, 0, kTextAlignment.center)
+        -- This text goes off the image context
+    gfx.popContext()
+    sprite:setImage(image)
+    sprite:moveTo(x+rndOffset, y+rndOffset)
+    sprite:setZIndex(Z_INDEX.UI)
+    sprite:add()
+
+    --remove the text after a delay
+    pd.timer.new(300, function()
+        sprite:remove()
+    end)
+end
+
+function UIManager:displayNotification(message)
+    -- Display a notification message on the screen
+    local geo = playdate.geometry
+    local Animator = playdate.graphics.animator
+
+    local startPoint = geo.point.new(MaxWidth/2, -64)
+    local endPoint = geo.point.new(MaxWidth/2, 64)
+
+    local yOffset = CameraManager.cameraPosition.y
+    local notificationSprite = gfx.sprite.new()
+    local notificationImage = gfx.image.new(MaxWidth, 32)
+
+    local line1 = geo.lineSegment.new(startPoint.x, startPoint.y + yOffset, endPoint.x, endPoint.y + yOffset)
+
+    local spriteAnimation = Animator.new(500, line1, pd.easingFunctions.linear)
+    -- spriteAnimation.repeatCount = 1
+
+    gfx.pushContext(notificationImage)
+        -- Draw a background rectangle
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(0, 0, notificationImage.width, notificationImage.height)
+        gfx.setColor(gfx.kColorWhite)
+        gfx.drawRect(0, 0, notificationImage.width - 8, notificationImage.height - 8)
+        gfx.setColor(gfx.kColorWhite)
+        gfx.drawTextAligned(message, MaxWidth/2, notificationImage.height/2, kTextAlignment.center)
+    gfx.popContext()
+
+    notificationSprite:setImage(notificationImage)
+    -- move towards goalY
+
+    notificationSprite:moveTo(startPoint.x, endPoint.y + yOffset)
+    notificationSprite:setZIndex(Z_INDEX.UI)
+    notificationSprite:add()
+
+    notificationSprite:setAnimator(spriteAnimation)
+
+    -- Remove the sprite after a delay
+    pd.timer.new(2000, function()
+        -- Move the sprite back off the top of the screen
+        notificationSprite:remove()
+    end)
 end
 
 function UIManager:draw()
