@@ -15,6 +15,7 @@ UIManager = {
     state = "inactive",
     states = { "inactive", "active"},
     BgImg = gfx.image.new("assets/sprites/menubg"),
+    BgImg2 = gfx.image.new("assets/sprites/menubg2"),
     gridBackground = gfx.nineSlice.new("assets/sprites/gridbackground", 7, 7, 18, 18),
 }
 -- UIManager to handle UI elements and interactions
@@ -39,8 +40,8 @@ function UIManager:drawUI()
         gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)
         gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 50, kTextAlignment.right)
     elseif StateManager:getState() == "shopping" then
-        gfx.drawTextAligned("Press A to buy", 16, 30, kTextAlignment.left)
-        gfx.drawTextAligned("Press B to cancel", 16, 50, kTextAlignment.left)
+        -- gfx.drawTextAligned("Press A to buy", 16, 30, kTextAlignment.left)
+        -- gfx.drawTextAligned("Press B to cancel", 16, 50, kTextAlignment.left)
         gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 50, kTextAlignment.right)
     elseif StateManager:getState() ~= "idle" then
         gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)

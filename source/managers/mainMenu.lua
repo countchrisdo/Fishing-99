@@ -43,11 +43,20 @@ end
 
 function MainMenu:update()
     if StateManager:getState() == "main menu" then
+        if self.buttonCooldown then
+            return -- Ignore input during cooldown
+        end
+
         if playdate.buttonJustPressed(playdate.kButtonA) then
             print("A pressed: Starting game from main menu")
             gfx.sprite.removeAll()
             gfx.clear()
             LoadToGame()
+
+            -- Set a cooldown to prevent immediate re-trigger
+            self.buttonCooldown = pd.timer.new(300, function()
+                self.buttonCooldown = nil
+            end)
         end
     end
 end

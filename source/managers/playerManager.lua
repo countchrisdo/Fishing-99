@@ -8,10 +8,17 @@ PlayerManager = {
     states = { "inactive", "active"},
     pMoney = 1000, -- test value
     hookInventory = {},
-    hookInventorymax = 3, -- Maximum items on the hook
     hookSpeed = 2,
-    depth = 0, -- Depth of the hook, can be used for camera positioning or other logic. modifyed by the crank
-    depthMax = 1000, -- Maximum depth
+    depth = 0,
+    depthMax = 100, baseDepthMax = 100,-- lineLength
+    hookInventorymax = 1, baseHookInventorymax = 1, -- hookCapacity
+    baitQuality = 1, baseBaitQuality = 1,--baitQuality (multiply for fish value)
+
+    upgradeLvl = {
+        depthMax = 0,
+        hookInventorymax = 0,
+        baitQuality = 0
+    }
 }
 
 function PlayerManager:initialize()
@@ -52,6 +59,9 @@ function PlayerManager:initialize()
     self.bSprite:moveTo(self.boatPosition.x, self.boatPosition.y)
 
     self.depth = 0
+
+    --Init upgrades
+    self:applyUpgrades()
 end
 
 Compendium = {
@@ -71,36 +81,45 @@ function Compendium:updateFishCount(fish)
     end
 end
 
+
+
 function PlayerManager:draw()
     -- draw fishing line
     if StateManager:getState() ~= "shopping" and StateManager:getState() ~= "main menu" then
         gfx.drawLine(self.rodPosition.x + 15, self.rodPosition.y - 12, self.hSprite.x, self.hSprite.y - 10)
     end
-    
 end
 
 function PlayerManager:update()
 
     if StateManager.currentState == "idle" then
-        -- self.hSprite.y = self.hookPosition.y
-
+        if self.buttonCooldown then
+            return -- Ignore input during cooldown
+        end
         if pd.buttonJustPressed(pd.kButtonA) then
             print("A button pressed, casting hook...")
             StateManager:setState("casting")
             SoundManager:playSound("cast", 1)
             SoundManager:playSound("reel", 2)
+
+            -- Set a cooldown to prevent immediate re-trigger
+            self.buttonCooldown = pd.timer.new(300, function()
+                self.buttonCooldown = nil
+            end)
         end
 
-        if pd.buttonIsPressed(pd.kButtonB) then
+        if pd.buttonJustPressed(pd.kButtonB) then
+            -- Set a cooldown to prevent immediate reopening
+            self.buttonCooldown = pd.timer.new(300, function()
+                self.buttonCooldown = nil
+            end)
+            print("B button pressed, opening shopping menu...")
             StateManager:setState("shopping")
             ShoppingMenu:show()
-            print("B button pressed, opening shopping menu...")
-            -- remove player sprite
             self.pSprite:remove()
             self.rSprite:remove()
             self.bSprite:remove()
             self.hSprite:remove()
-
         end
     elseif StateManager.currentState == "casting" then
         -- Move the hook towards the center of the screen
@@ -180,9 +199,9 @@ function PlayerManager:update()
             -- Hook has reached the player
             -- Add the value of the caught fish to the player's money
             for i = 1, #self.hookInventory do
-                self.pMoney = self.pMoney + self.hookInventory[i].value
+                self.pMoney = self.pMoney + (self.hookInventory[i].value * self.baitQuality)
                 print("Caught fish:", self.hookInventory[i].name)
-                print("Caught fish value:", self.hookInventory[i].value)
+                print("Value:", self.hookInventory[i].value * self.baitQuality)
                 SoundManager:playSound("cash", 1)
             end
             print("Total money:", self.pMoney)
@@ -244,11 +263,16 @@ function PlayerManager:handleInput()
         end
     end
 end
-function PlayerManager:reset()
-    -- Reset player state and position to defaults
-    self.hSprite:moveTo(self.hookPosition.x, self.hookPosition.y)
 
-end
+-- Upgrades
+function PlayerManager:applyUpgrades()
+    print("Applying upgrades to PlayerManager")
+    for key, upgrade in pairs(Upgrades) do
+        print("Applying upgrade:", upgrade.id)
+            upgrade.apply(self) -- Call the apply function for the specific upgrade
+        end
+    end
+
 -- function PlayerManager:saveState()
 --     -- Save player state to a file or database
 --     local state = {
