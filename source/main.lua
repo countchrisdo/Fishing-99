@@ -10,6 +10,7 @@ import "managers/cameraManager"
 import "managers/fishManager"
 import "managers/worldManager"
 import "managers/soundManager"
+import "managers/saveManager"
 
 import "data/CONSTS"
 
@@ -29,6 +30,7 @@ function LoadToGame()
 
     StateManager:setState("idle")
     PlayerManager:initialize()
+    PlayerManager:loadState()
     CameraManager:initialize()
     FishManager:initialize()
     UIManager:initialize()
@@ -41,6 +43,13 @@ LoadToMenu()
 
 -- not playing yet to test sfx, remember to renable BGMswitch too
 -- SoundManager:playBGM()
+
+function pd.gameWillTerminate()
+    PlayerManager:saveState()
+end
+
+-- Load player state on game start
+PlayerManager:loadState()
 
 -- One day you need to clean up this mess of an update loop
 function pd.update()

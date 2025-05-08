@@ -6,9 +6,8 @@ import "CoreLibs/sprites"
 PlayerManager = {
     state = "inactive",
     states = { "inactive", "active"},
-    pMoney = 300, -- test value
+    pMoney = 0,
     hookSpeed = 2,
-    
     -- Upgrades
     depth = 0, depthMax = 200, baseDepthMax = 200,-- lineLength
     hookInventory = {}, hookInventorymax = 1, baseHookInventorymax = 1, -- hookCapacity
@@ -267,18 +266,29 @@ function PlayerManager:applyUpgrades()
         end
     end
 
--- function PlayerManager:saveState()
---     -- Save player state to a file or database
---     local state = {
---         playerState = self.playerState,
---         playerPosition = self.playerPosition,
---         playerInventory = self.playerInventory
---     }
---     -- Save logic goes here
---     print("Player state saved.")
--- end
--- function PlayerManager:loadState()
---     -- Load player state from a file or database
---     -- Load logic goes here
---     print("Player state loaded.")
--- end
+function PlayerManager:saveState()
+    local playerData = {
+        pMoney = self.pMoney,
+        depth = self.depth,
+        hookInventory = self.hookInventory,
+        upgrades = {
+            depthMax = self.depthMax,
+            hookInventorymax = self.hookInventorymax,
+            baitQuality = self.baitQuality,
+        }
+    }
+    SaveManager:savePlayerData(playerData)
+end
+
+function PlayerManager:loadState()
+    local playerData = SaveManager:loadPlayerData()
+    if playerData then
+        self.pMoney = playerData.pMoney or self.pMoney
+        self.depth = playerData.depth or self.depth
+        self.hookInventory = playerData.hookInventory or {}
+        self.depthMax = playerData.upgrades.depthMax or self.baseDepthMax
+        self.hookInventorymax = playerData.upgrades.hookInventorymax or self.baseHookInventorymax
+        self.baitQuality = playerData.upgrades.baitQuality or self.baseBaitQuality
+        print("Player state loaded into PlayerManager.")
+    end
+end
