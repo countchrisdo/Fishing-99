@@ -38,6 +38,7 @@ function UIManager:drawUI()
         end
 
         gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)
+        gfx.drawTextAligned("Time of Day: " ..WorldManager.timeOfDay, MaxWidth-16, 10, kTextAlignment.right)
         gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 50, kTextAlignment.right)
     elseif StateManager:getState() == "shopping" then
         -- gfx.drawTextAligned("Press A to buy", 16, 30, kTextAlignment.left)
@@ -45,6 +46,7 @@ function UIManager:drawUI()
         gfx.drawTextAligned("Cash:"..PlayerManager.pMoney, MaxWidth-16, 50, kTextAlignment.right)
     elseif StateManager:getState() ~= "idle" then
         gfx.drawTextAligned("Time: " ..WorldManager.formattedTime, MaxWidth-16, 30, kTextAlignment.right)
+
         gfx.drawTextAligned("Depth:"..PlayerManager.depth, MaxWidth-16, 50, kTextAlignment.right)
         gfx.drawTextAligned("Fish caught: " .. #PlayerManager.hookInventory .. "/" .. PlayerManager.hookInventorymax, MaxWidth-16, 70, kTextAlignment.right)
     end

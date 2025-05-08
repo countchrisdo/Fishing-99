@@ -8,7 +8,14 @@ The theme was "Futuristic", "Relaxation" and "Golden Hour"
 ## Controls
 - **D-Pad** - Move the hook
 - **A** - Cast the hook
+- **B** - Cancel
 - **Crank** - Change your depth
+
+If you are using a keyboard, the controls are:
+- **Arrow Keys** - Move the hook
+- **A** - Cast the hook
+- **S** - Cancel
+- **Mouse Wheel** - Change your depth
 
 ## Sources:
 ### Sprites

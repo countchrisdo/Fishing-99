@@ -12,8 +12,8 @@ StoreManager = {
 
 }
 
--- Upgrades
--- line length, line speed, hook capacity, boat size, 
+-- Upgrades: line length, hook capacity, bait quality
+-- Ideas: Wallet size, hook speed, hook size
 Upgrades = {
     lineLength = {
         id = "lineLength",
@@ -21,9 +21,12 @@ Upgrades = {
         description = "Fish deeper waters.",
         level = 0,
         maxLevel = 5,
-        costFunction = function(level) return 100 + level * 150 end,
+        costFunction = function(level) return 50 + level * 75 end,
         apply = function(player)
-            player.depthMax = player.baseDepthMax + (player.upgradeLvl.depthMax * 100)
+            local upgradeLevel = Upgrades.lineLength.level
+            print("- depthMax:apply() running upgrade: Upgrade Level" ..upgradeLevel)
+            player.depthMax = player.baseDepthMax + (upgradeLevel * 100)
+            print("New DepthMax: " .. player.depthMax .. " (Base " .. player.baseDepthMax .. " + Upgrade Level " .. upgradeLevel .. ")")
         end
     },
     hookCapacity = {
@@ -34,18 +37,10 @@ Upgrades = {
         maxLevel = 10,
         costFunction = function(level) return 50 + level * 50 end,
         apply = function(player)
-            -- Debugging: Print current upgrade level
-            print("Applying hook capacity upgrade")
-            print("PlayerManager.upgradeLvl.hookCapacity: " .. tostring(PlayerManager.upgradeLvl.hookCapacity))
-
-            -- Ensure the most up-to-date value is used
-            local upgradeLevel = PlayerManager.upgradeLvl.hookCapacity or 0
-            print("Upgrade level being applied: " .. upgradeLevel)
-
-            -- Calculate new hook capacity
+            local upgradeLevel = Upgrades.hookCapacity.level
+            print("- hookCapacity:apply running Upgrade Level " ..upgradeLevel)
             player.hookInventorymax = player.baseHookInventorymax + upgradeLevel
-            print("New hook capacity: " .. player.hookInventorymax)
-            print("Calculated by Base " .. player.baseHookInventorymax .. " + upgradeLvl " .. upgradeLevel)
+            print("New hook capacity: " ..player.hookInventorymax .." (Base " ..player.baseHookInventorymax .." + Upgrade Level " ..upgradeLevel .. ")")
         end
     },
     baitQuality = {
@@ -54,18 +49,19 @@ Upgrades = {
         description = "Better bait for better fish.",
         level = 0,
         maxLevel = 5,
-        costFunction = function(level) return 150 + level * 175 end,
+        costFunction = function(level) return 50 + level * 100 end,
         apply = function(player)
-            print("Applying bait quality upgrade")
+            print("- baitQuality:apply() Running")
+            local upgradeLevel = Upgrades.baitQuality.level
             print("Current bait quality: " .. player.baitQuality)
-            player.baitQuality = player.baitQuality + (player.upgradeLvl.baitQuality * 0.5)
-            print("New bait quality: " .. player.baitQuality)
+            player.baitQuality = player.baitQuality + (upgradeLevel * 0.5)
+            print("New bait quality: " .. player.baitQuality .. " (Base + Upgrade Level " .. upgradeLevel .. " * 0.5)")
         end
-    }
+    },
 }
 
 ShoppingMenu = {
-    state = "inactive", --active right now for testing
+    state = "inactive",
     states = { "inactive", "active"},
 }
 
@@ -159,7 +155,6 @@ function ShoppingMenu:update()
         StateManager:setState("idle")
     end
 
-    -- Handle "A" button press to level up the selected upgrade
     if pd.buttonJustPressed(playdate.kButtonA) then
         local selectedRow = self.gridview:getSelectedRow()
         local selectedKey = self.upgradeKeys[selectedRow]
@@ -170,9 +165,10 @@ function ShoppingMenu:update()
             if PlayerManager.pMoney >= cost then
                 PlayerManager.pMoney = PlayerManager.pMoney - cost
                 selectedUpgrade.level = selectedUpgrade.level + 1
-                PlayerManager.upgradeLvl[selectedKey] = selectedUpgrade.level
-                print("Upgraded " .. selectedUpgrade.name .. " to level " .. selectedUpgrade.level)
-                print("Player upgradeLvl " .. selectedKey .. ": " .. PlayerManager.upgradeLvl[selectedKey])
+                print("--------")
+                print("PURCHASE MADE: ")
+                print("Store setting " .. selectedUpgrade.name .. " to level " .. selectedUpgrade.level)
+                print("--------")
                 PlayerManager:applyUpgrades()
             else
                 print("Not enough currency to upgrade " .. selectedUpgrade.name)
@@ -202,7 +198,7 @@ function ShoppingMenu:hide()
     self.state = "inactive"
     self.spriteBG:remove()
     self.gridviewSprite:remove()
-
+    -- Bring back Player Sprites
     PlayerManager.pSprite:add()
     PlayerManager.rSprite:add()
     PlayerManager.bSprite:add()

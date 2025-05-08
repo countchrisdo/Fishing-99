@@ -42,7 +42,7 @@ LoadToMenu()
 -- not playing yet to test sfx, remember to renable BGMswitch too
 -- SoundManager:playBGM()
 
--- One day you need to clean up this of an update loop
+-- One day you need to clean up this mess of an update loop
 function pd.update()
     gfx.clear()
     -- gfx.sprite.update()
@@ -58,6 +58,7 @@ function pd.update()
 end
 
 -- Communitcation with Console
+-- To use this type: msg <command>
 function pd.serialMessageReceived(message)
     print("Message received:", message)
     if message == "cast" then
@@ -74,6 +75,10 @@ function pd.serialMessageReceived(message)
         local fish = FishManager:getRandomFish()
         PlayerManager.hookInventory[#PlayerManager.hookInventory + 1] = fish
         print("Fish caught:", fish)
+    elseif message == "test" then
+        --Insert whatever I'm testing here
+        print("Testing...")
+        WorldManager:testTimeOfDayLogic()
     else
         print("Unknown Command")
     end

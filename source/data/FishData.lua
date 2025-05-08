@@ -4,63 +4,90 @@ local FISHDATA = {
         value = 1,
         depthRange = { min = 100, max = 300 },
         spritePath = "assets/sprites/fish/cd",
-        discovered = true
+        discovered = true,
+        spawnTime = "any",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Floppy Fish",
         value = 2,
         depthRange = { min = 100, max = 100 },
         spritePath = "assets/sprites/fish/floppy",
-        discovered = true
+        discovered = true,
+        spawnTime = "any",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Fish Friend",
         value = 10,
         depthRange = { min = 50, max = 300 },
         spritePath = "assets/sprites/fish/fishfriend",
-        discovered = false
+        discovered = false,
+        spawnTime = "day",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Eye Fish",
         value = 20,
         depthRange = { min = 100, max = 400 },
         spritePath = "assets/sprites/fish/eyefish",
-        discovered = false
+        discovered = false,
+        spawnTime = "any",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Lore Fish",
         value = 1,
         depthRange = { min = 50, max = 300 },
         spritePath = "assets/sprites/fish/lorefish",
-        discovered = false
+        discovered = false,
+        spawnTime = "night",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Griffish",
         value = 50,
         depthRange = { min = 200, max = 500 },
         spritePath = "assets/sprites/fish/griffish",
-        discovered = false
+        discovered = false,
+        spawnTime = "any",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Grumsh",
         value = 50,
         depthRange = { min = 100, max = 700 },
         spritePath = "assets/sprites/fish/grumsh",
-        discovered = false
+        discovered = false,
+        spawnTime = "any",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Devilish",
         value = 50,
         depthRange = { min = 300, max = 1000 },
         spritePath = "assets/sprites/fish/devilish",
-        discovered = false
+        discovered = false,
+        spawnTime = "night",
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     },
     {
         name = "Golden Fish",
         value = 100,
         depthRange = { min = 500, max = 1000 },
         spritePath = "assets/sprites/fish",
-        discovered = false
+        discovered = false,
+        spawnTime = {"dawn", "dusk"},
+        description = "A shiny CD that seems to have been lost in the depths.",
+        lore = "A relic of the past, this CD was once a popular music medium. Now, it serves as a reminder of the days when music was physical.",
     }
 }
 

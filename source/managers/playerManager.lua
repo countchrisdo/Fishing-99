@@ -6,19 +6,13 @@ import "CoreLibs/sprites"
 PlayerManager = {
     state = "inactive",
     states = { "inactive", "active"},
-    pMoney = 1000, -- test value
-    hookInventory = {},
+    pMoney = 300, -- test value
     hookSpeed = 2,
-    depth = 0,
-    depthMax = 100, baseDepthMax = 100,-- lineLength
-    hookInventorymax = 1, baseHookInventorymax = 1, -- hookCapacity
+    
+    -- Upgrades
+    depth = 0, depthMax = 200, baseDepthMax = 200,-- lineLength
+    hookInventory = {}, hookInventorymax = 1, baseHookInventorymax = 1, -- hookCapacity
     baitQuality = 1, baseBaitQuality = 1,--baitQuality (multiply for fish value)
-
-    upgradeLvl = {
-        depthMax = 0,
-        hookInventorymax = 0,
-        baitQuality = 0
-    }
 }
 
 function PlayerManager:initialize()
@@ -266,9 +260,9 @@ end
 
 -- Upgrades
 function PlayerManager:applyUpgrades()
-    print("Applying upgrades to PlayerManager")
+    print("PlayerManager:applyUpgrades() called")
     for key, upgrade in pairs(Upgrades) do
-        print("Applying upgrade:", upgrade.id)
+        print("-", upgrade.id)
             upgrade.apply(self) -- Call the apply function for the specific upgrade
         end
     end

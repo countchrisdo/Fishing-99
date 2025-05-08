@@ -34,11 +34,27 @@ removeOnCollision, if provided and true will cause the animator to be removed fr
 ]]
 
 
-function FishManager:getFishByDepth(depth)
--- Returns: list of fish that can spawn at the given depth.
+function FishManager:getFishByDepth(depth, timeOfDay)
+    -- Returns: list of fish that can spawn at the given depth and time of day.
     local availableFish = {}
     for _, fish in ipairs(self.FISHDATA) do
-        if depth >= fish.depthRange.min and depth <= fish.depthRange.max then
+        local depthMatch = depth >= fish.depthRange.min and depth <= fish.depthRange.max
+        local timeMatch = false
+
+        if fish.spawnTime == "any" then
+            timeMatch = true
+        elseif type(fish.spawnTime) == "string" then
+            timeMatch = fish.spawnTime == timeOfDay
+        elseif type(fish.spawnTime) == "table" then
+            for _, spawnTime in ipairs(fish.spawnTime) do
+                if spawnTime == timeOfDay then
+                    timeMatch = true
+                    break
+                end
+            end
+        end
+
+        if depthMatch and timeMatch then
             table.insert(availableFish, fish)
         end
     end
@@ -50,75 +66,72 @@ function FishManager:getRandomFish()
     return self.FISHDATA[math.random(#self.FISHDATA)]
 end
 
-function FishManager:spawnFish(depth)
-    if self.state == "inactive" then
-        print("FishManager is inactive. Cannot spawn fish.")
-        return
-    end
-
-    print("Checking if fish can spawn at depth:", depth)
-    local availableFish = self:getFishByDepth(depth)
+function FishManager:spawnFish(depth, timeOfDay)
+    print("Checking if fish can spawn at depth:", depth, "and timeOfDay:", timeOfDay)
+    local availableFish = self:getFishByDepth(depth, timeOfDay)
     if #availableFish == 0 then
-        print("No fish available at this depth.")
+        print("No fish available at this depth and time.")
         return
     end
-    print("Fish available at this depth:", #availableFish)
+    print("Fish available at this depth and time:", #availableFish)
 
-    if #availableFish > 0 then
-        local fish = availableFish[math.random(#availableFish)]
-        local fishImage = nil
-        if fish.discovered then
-            print("Known Fish Spawn:", fish.name)
-            fishImage = gfx.image.new(fish.spritePath)
-        else
-            print("Unknown Fish Spawn:", fish.name)
-            fishImage = corruptedFishAnim:image()
-        end
-
-
-        if not fishImage then
-            print("Failed to load fish image:", fish.spritePath)
-            return
-        end
-
-        local fishSprite = gfx.sprite.new(fishImage)
-        fishSprite.update = function()
-            if fish.discovered then
-                fishSprite:setImage(fishImage)
-            else
-                fishSprite:setImage(corruptedFishAnim:image())
-            end
-        end
-
-        fishSprite:setScale(2)
-
-        fishSprite:setCollideRect(0, 0, fishSprite:getSize())
-        fishSprite:setZIndex(Z_INDEX.FISH)
-        fishSprite:setTag(2)
-
-        fishSprite:moveTo(0, CameraManager.cameraPosition.y + math.random(64, 128))
-        fishSprite:add()
-
-        table.insert(self.activeFish, {
-            sprite = fishSprite,
-            data = fish,
-            speed = math.random(1, 3)
-        })
-        print("activeFish Number:", #self.activeFish)
+    local fish = availableFish[math.random(#availableFish)]
+    local fishImage = nil
+    if fish.discovered then
+        print("Known Fish Spawn:", fish.name)
+        fishImage = gfx.image.new(fish.spritePath)
+    else
+        print("Unknown Fish Spawn:", fish.name)
+        fishImage = corruptedFishAnim:image()
     end
+
+    if not fishImage then
+        print("Failed to load fish image:", fish.spritePath)
+        return
+    end
+
+    local fishSprite = gfx.sprite.new(fishImage)
+    fishSprite.update = function()
+        if fish.discovered then
+            fishSprite:setImage(fishImage)
+        else
+            fishSprite:setImage(corruptedFishAnim:image())
+        end
+    end
+
+    fishSprite:setScale(2)
+    fishSprite:setCollideRect(0, 0, fishSprite:getSize())
+    fishSprite:setZIndex(Z_INDEX.FISH)
+    fishSprite:setTag(2)
+
+    fishSprite:moveTo(0, CameraManager.cameraPosition.y + math.random(64, 128))
+    fishSprite:add()
+
+    table.insert(self.activeFish, {
+        sprite = fishSprite,
+        data = fish,
+        speed = math.random(1, 3)
+    })
+    print("activeFish Number:", #self.activeFish)
 end
 
 function FishManager:update()
     local currentTime = playdate.getCurrentTimeMilliseconds()
 
-    -- Spawn fish at intervals
-    if currentTime - self.lastSpawnTime > self.spawnInterval then
-        self:spawnFish(PlayerManager.depth)
-        self.lastSpawnTime = currentTime
+    -- Update active fish positions
+    self:updateFish()
+
+    -- Check if the state is inactive. Returns to avoid spawning fish.
+    if self.state == "inactive" then
+        return
     end
 
-    -- Update active fish
-    self:updateFish()
+    -- Spawn fish at intervals
+    if currentTime - self.lastSpawnTime > self.spawnInterval then
+        local timeOfDay = WorldManager:getTimeOfDay()
+        self:spawnFish(PlayerManager.depth, timeOfDay)
+        self.lastSpawnTime = currentTime
+    end
 end
 
 function FishManager:updateFish()
