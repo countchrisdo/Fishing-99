@@ -10,7 +10,6 @@ local FISHDATA1 = import "data/FISHDATA"
 local corruptedFishImg = gfx.imagetable.new("assets/sprites/fish/corrupt-table-22-20")
 local corruptedFishAnim = gfx.animation.loop.new(100, corruptedFishImg, true)
 
-
 FishManager = {
     FISHDATA = FISHDATA1,
     state = "inactive",
@@ -23,7 +22,6 @@ FishManager = {
 function FishManager:initialize()
     self.state = "active"
 end
-
 
 --[[
 setAnimator()
