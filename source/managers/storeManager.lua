@@ -8,9 +8,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/UI"
 import"CoreLibs/nineslice"
 
-StoreManager = {
-
-}
+StoreManager = {}
 
 -- Upgrades: line length, hook capacity, bait quality
 -- Ideas: Wallet size, hook speed, hook size
@@ -81,7 +79,6 @@ function ShoppingMenu:initialize()
     for key in pairs(Upgrades) do
         table.insert(self.upgradeKeys, key)
     end
-    -- Populate the fishDexArr with fish names
     print("FishDex keys:")
     for fish in pairs(FishDex.fishList) do
         table.insert(self.fishDexArr, fish)
@@ -89,7 +86,8 @@ function ShoppingMenu:initialize()
     end
 
     local upgradesCount = #self.upgradeKeys
-    local fishDexCount = #self.fishDexArr or 1
+    -- local fishDexCount = #self.fishDexArr or 1
+    local fishDexCount = 9
     self.gridviewShop:setNumberOfRows(upgradesCount)
     self.gridviewDex:setNumberOfRows(fishDexCount)
     print("GridviewShop rows: " .. upgradesCount)
@@ -137,11 +135,19 @@ function ShoppingMenu:initialize()
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
         end
         local key = ShoppingMenu.fishDexArr[row]
-        local fishName = FishDex.fishList[key].name
-        local fishRarity = FishDex.fishList[key].count
+        local fishName = "not set"
+        if not FishDex.fishList[key] then
+            print("Fish name not found for key")
+            return
+        end
+        fishName = FishDex.fishList[key].name
+        if FishDex.fishList[key].count == nil then
+            FishDex.fishList[key].count = 0
+        end
+        local fishCount = FishDex.fishList[key].count
 
         local fontHeight = gfx.getSystemFont():getHeight()
-        gfx.drawTextInRect(fishName .. " : +" .. fishRarity, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
+        gfx.drawTextInRect(fishName .. " : +" .. fishCount, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
     end
     function self.gridviewDex:drawSectionHeader(section, x, y, width, height)
         local fontHeight = gfx.getSystemFont():getHeight()
@@ -243,7 +249,7 @@ function ShoppingMenu:update()
             if selectedUpgrade.level < selectedUpgrade.maxLevel then
                 local cost = selectedUpgrade.costFunction(selectedUpgrade.level)
                 if PlayerManager.pMoney >= cost then
-                    PlayerManager.pMoney = PlayerManager.pMoney - cost
+                    PlayerManager:setMoney(PlayerManager.pMoney - cost)
                     selectedUpgrade.level = selectedUpgrade.level + 1
                     print("--------")
                     print("PURCHASE MADE: ")
@@ -309,6 +315,14 @@ function ShoppingMenu:hide()
     PlayerManager.buttonCooldown = pd.timer.new(300, function()
         PlayerManager.buttonCooldown = nil
     end)
+end
+
+function ShoppingMenu:refreshFishDexArr()
+    self.fishDexArr = {} -- Reset the array
+    for fish in pairs(FishDex.fishList) do
+        table.insert(self.fishDexArr, fish)
+    end
+    self.gridviewDex:setNumberOfRows(#self.fishDexArr) -- Update the gridview row count
 end
 
 function CountTableKeys(tbl)

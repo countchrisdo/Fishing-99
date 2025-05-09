@@ -64,6 +64,7 @@ function FishDex:addFish(fish)
     if not self.fishList[fish.name] then
         self.fishList[fish.name] = fish
         print("New fish discovered:", fish.name)
+        ShoppingMenu:refreshFishDexArr()
     end
 end
 
@@ -77,8 +78,6 @@ end
 function FishDex:returnAllFish()
     return self.fishList
 end
-
-
 
 function PlayerManager:draw()
     -- draw fishing line
@@ -198,7 +197,7 @@ function PlayerManager:update()
             -- Hook has reached the player
             -- Add the value of the caught fish to the player's money
             for i = 1, #self.hookInventory do
-                self.pMoney = self.pMoney + (self.hookInventory[i].value * self.baitQuality)
+                self:setMoney(self.pMoney + (self.hookInventory[i].value * self.baitQuality))
                 print("Caught fish:", self.hookInventory[i].name)
                 print("Value:", self.hookInventory[i].value * self.baitQuality)
                 SoundManager:playSound("cash", 1)
@@ -280,7 +279,7 @@ function PlayerManager:saveState()
             hookInventorymax = self.hookInventorymax,
             baitQuality = self.baitQuality,
         },
-        fishDex = FishDex.fishList,
+        FishDex = FishDex,
     }
     SaveManager:savePlayerData(playerData)
 end
@@ -293,7 +292,20 @@ function PlayerManager:loadState()
         self.depthMax = playerData.upgrades.depthMax or self.baseDepthMax
         self.hookInventorymax = playerData.upgrades.hookInventorymax or self.baseHookInventorymax
         self.baitQuality = playerData.upgrades.baitQuality or self.baseBaitQuality
-        FishDex.fishList = playerData.fishDex or {}
+        FishDex.fishList = playerData.FishDex.fishList or FishDex.fishList
         print("Player state loaded into PlayerManager.")
     end
+end
+
+function PlayerManager:setMoney(amount)
+    print("PlayerManager:setMoney() called with amount:", amount)
+    if amount < 0 then
+        print("Error: Amount cannot be negative.")
+        return
+    end
+    if amount > 99999 then
+        print("Error: Amount exceeds maximum limit.")
+        return
+    end
+    self.pMoney = math.floor(amount)
 end

@@ -1,19 +1,16 @@
 -- This is the in game UI. The Main Menu and Store Menu are separate..
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
-
+-- Import Libraries
 import "CoreLibs/graphics"
 import "CoreLibs/timer"
 import "CoreLibs/sprites"
 import "CoreLibs/UI"
 import "CoreLibs/nineslice"
 import "CoreLibs/animation"
-
-
+-- Import Managers
 import "managers/stateManager"
 import "managers/playerManager"
-
-
 
 UIManager = {
     state = "inactive",
@@ -61,11 +58,10 @@ function UIManager:textAtFish(message, x, y)
     local rndOffset = math.random(-4, 4)
 
     local sprite = gfx.sprite.new()
-    local image= gfx.image.new(64, 32)
+    local image= gfx.image.new(100, 100)
     gfx.pushContext(image)
-        gfx.drawText("+$"..message, 16, 16)
-        -- gfx.drawTextAligned(("Fish caught!"), 16, 0, kTextAlignment.center)
-        -- This text goes off the image context
+    -- Draw a background rectangle
+        gfx.drawText("+$"..message, 50, 50)
     gfx.popContext()
     sprite:setImage(image)
     sprite:moveTo(x+rndOffset, y+rndOffset)

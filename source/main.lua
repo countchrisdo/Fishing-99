@@ -46,14 +46,17 @@ LoadToMenu()
 
 function pd.gameWillTerminate()
     PlayerManager:saveState()
+    SaveManager:saveUpgradeLevels()
 end
 
 function pd.gameWillPause()
     PlayerManager:saveState()
+    SaveManager:saveUpgradeLevels()
 end
 
 -- Load player state on game start
 PlayerManager:loadState()
+SaveManager:loadUpgradeLevels()
 
 -- One day you need to clean up this mess of an update loop
 function pd.update()
@@ -91,7 +94,11 @@ function pd.serialMessageReceived(message)
     elseif message == "test" then
         --Insert whatever I'm testing here
         print("Testing...")
-        WorldManager:testTimeOfDayLogic()
+        -- WorldManager:testTimeOfDayLogic()
+    elseif message == "delete" then
+        SaveManager:deleteAllSaves()
+        print("Save cleared.")
+        print("Game saved.")
     else
         print("Unknown Command")
     end
