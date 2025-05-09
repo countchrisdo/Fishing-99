@@ -63,50 +63,92 @@ Upgrades = {
 ShoppingMenu = {
     state = "inactive",
     states = { "inactive", "active"},
+    page = {"shop"},
+    pages = {"shop", "fishdex", "options"}
 }
 
 function ShoppingMenu:initialize()
-    print("Gridview initialized")
+    print("Gridviews initializing")
 
     self.spriteBG = gfx.sprite.new(UIManager.BgImg2)
     self.spriteBG:moveTo(MaxWidth / 2, MaxHeight / 2)
     self.spriteBG:setZIndex(Z_INDEX.UI - 1)
 
-    self.gridview = pd.ui.gridview.new(0, 32)
+    self.gridviewShop = pd.ui.gridview.new(0, 32)
+    self.gridviewDex = pd.ui.gridview.new(0, 32)
     self.upgradeKeys = {} -- Create a list of keys from the Upgrades table
+    self.fishDexArr = {} -- Create a list of keys from the FishDex table
     for key in pairs(Upgrades) do
         table.insert(self.upgradeKeys, key)
     end
+    -- Populate the fishDexArr with fish names
+    print("FishDex keys:")
+    for fish in pairs(FishDex.fishList) do
+        table.insert(self.fishDexArr, fish)
+        print("Fish: " .. fish)
+    end
 
     local upgradesCount = #self.upgradeKeys
-    self.gridview:setNumberOfRows(upgradesCount)
-    print("Gridview rows: " .. upgradesCount)
-    self.gridview:setCellPadding(2, 2, 2, 2)
+    local fishDexCount = #self.fishDexArr or 1
+    self.gridviewShop:setNumberOfRows(upgradesCount)
+    self.gridviewDex:setNumberOfRows(fishDexCount)
+    print("GridviewShop rows: " .. upgradesCount)
+    print("GridviewDex rows: " .. fishDexCount)
+    self.gridviewShop:setCellPadding(2, 2, 2, 2)
+    self.gridviewDex:setCellPadding(2, 2, 2, 2)
 
-    self.gridview.backgroundImage = UIManager.gridBackground
-    self.gridview:setContentInset(5, 5, 5, 5)
-    self.gridview:setSectionHeaderHeight(24)
+    self.gridviewShop.backgroundImage = UIManager.gridBackground
+    self.gridviewDex.backgroundImage = UIManager.gridBackground
+    self.gridviewShop:setContentInset(5, 5, 5, 5)
+    self.gridviewDex:setContentInset(5, 5, 5, 5)
+    self.gridviewShop:setSectionHeaderHeight(24)
+    self.gridviewDex:setSectionHeaderHeight(24)
 
-    self.gridviewSprite = gfx.sprite.new()
-    self.gridviewSprite:setCenter(0, 0)
-    self.gridviewSprite:moveTo(100, 16)
+    self.gridviewShopSprite = gfx.sprite.new()
+    self.gridviewDexSprite = gfx.sprite.new()
+    self.gridviewShopSprite:setCenter(0, 0)
+    self.gridviewDexSprite:setCenter(0, 0)
+    self.gridviewShopSprite:moveTo(100, 16)
+    self.gridviewDexSprite:moveTo(100, 16)
 
-    -- Pre-render the gridview image
-    local gridviewImage = gfx.image.new(200, 200)
-    gfx.pushContext(gridviewImage)
-        self.gridview:drawInRect(0, 0, 200, 200)
+    -- Pre-render the gridviewShop image
+    local gridviewShopImage = gfx.image.new(200, 200)
+    gfx.pushContext(gridviewShopImage)
+        self.gridviewShop:drawInRect(0, 0, 200, 200)
     gfx.popContext()
-    self.gridviewSprite:setImage(gridviewImage)
+    self.gridviewShopSprite:setImage(gridviewShopImage)
 
-    -- self.spriteBG:add()
-    -- self.gridviewSprite:add()
+    -- Pre-render the gridviewDex image
+    local gridviewDexImage = gfx.image.new(200, 200)
+    gfx.pushContext(gridviewDexImage)
+        self.gridviewDex:drawInRect(0, 0, 200, 200)
+    gfx.popContext()
+    self.gridviewDexSprite:setImage(gridviewDexImage)
 
-    function self.gridview:drawSectionHeader(section, x, y, width, height)
+    function self.gridviewShop:drawSectionHeader(section, x, y, width, height)
+        local fontHeight = gfx.getSystemFont():getHeight()
+        gfx.drawTextAligned("Shop", x + width / 2, y + (height / 2 - fontHeight / 2) + 2, kTextAlignment.center)
+    end
+    function self.gridviewDex:drawCell(section, row, column, selected, x, y, width, height)
+        if selected then
+            gfx.fillRoundRect(x, y, width, height, 4)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        else
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
+        local key = ShoppingMenu.fishDexArr[row]
+        local fishName = FishDex.fishList[key].name
+        local fishRarity = FishDex.fishList[key].count
+
+        local fontHeight = gfx.getSystemFont():getHeight()
+        gfx.drawTextInRect(fishName .. " : +" .. fishRarity, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
+    end
+    function self.gridviewDex:drawSectionHeader(section, x, y, width, height)
         local fontHeight = gfx.getSystemFont():getHeight()
         gfx.drawTextAligned("FishDex", x + width / 2, y + (height / 2 - fontHeight / 2) + 2, kTextAlignment.center)
     end
 
-    function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
+    function self.gridviewShop:drawCell(section, row, column, selected, x, y, width, height)
         if selected then
             gfx.fillRoundRect(x, y, width, height, 4)
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
@@ -124,24 +166,61 @@ function ShoppingMenu:initialize()
     end
 
     self.spriteBG:remove()
-    self.gridviewSprite:remove()
+    self.gridviewShopSprite:remove()
+    self.gridviewDexSprite:remove()
     self.state = "inactive"
+    self.page = "shop"
 end
 
 function ShoppingMenu:update()
+-- ShoppingMenu has become the source for multiple menus (pages)
     if self.state == "inactive" then
         return
     end
+
+    -- Logic for any menu page
 
     if PlayerManager.buttonCooldown then
         return -- Ignore input during cooldown
     end
 
     -- Traverse the gridview
-    if pd.buttonJustPressed(playdate.kButtonUp) then
-        self.gridview:selectPreviousRow(true)
-    elseif pd.buttonJustPressed(playdate.kButtonDown) then
-        self.gridview:selectNextRow(true)
+    if self.page == "shop" then
+        if pd.buttonJustPressed(playdate.kButtonUp) then
+            self.gridviewShop:selectPreviousRow(true)
+        elseif pd.buttonJustPressed(playdate.kButtonDown) then
+            self.gridviewShop:selectNextRow(true)
+        end
+    elseif self.page == "fishdex" then
+        if pd.buttonJustPressed(playdate.kButtonUp) then
+            self.gridviewDex:selectPreviousRow(true)
+        elseif pd.buttonJustPressed(playdate.kButtonDown) then
+            self.gridviewDex:selectNextRow(true)
+        end
+    end
+
+    -- Change Menus
+    -- Todo: Make this change the page programatically
+    if pd.buttonJustPressed(playdate.kButtonLeft) and self.page == "shop" then
+        self.gridviewShopSprite:remove()
+        self.gridviewDexSprite:add()
+        self.page = "fishdex"
+        print("Left pressed: Changing page to fishdex")
+    elseif pd.buttonJustPressed(playdate.kButtonRight) and self.page == "shop" then
+        self.gridviewShopSprite:remove()
+        self.gridviewDexSprite:add()
+        self.page = "fishdex"
+        print("Right pressed: Changing page to fishdex")
+    elseif pd.buttonJustPressed(playdate.kButtonLeft) and self.page == "fishdex" then
+        self.gridviewDexSprite:remove()
+        self.gridviewShopSprite:add()
+        self.page = "shop"
+        print("Left pressed: Changing page to shop")
+    elseif pd.buttonJustPressed(playdate.kButtonRight) and self.page == "fishdex" then
+        self.gridviewDexSprite:remove()
+        self.gridviewShopSprite:add()
+        self.page = "shop"
+        print("Right pressed: Changing page to shop")
     end
 
     -- Exit the menu
@@ -156,48 +235,70 @@ function ShoppingMenu:update()
     end
 
     if pd.buttonJustPressed(playdate.kButtonA) then
-        local selectedRow = self.gridview:getSelectedRow()
-        local selectedKey = self.upgradeKeys[selectedRow]
-        local selectedUpgrade = Upgrades[selectedKey]
+        if self.page == "shop" then
+            local selectedRow = self.gridviewShop:getSelectedRow()
+            local selectedKey = self.upgradeKeys[selectedRow]
 
-        if selectedUpgrade.level < selectedUpgrade.maxLevel then
-            local cost = selectedUpgrade.costFunction(selectedUpgrade.level)
-            if PlayerManager.pMoney >= cost then
-                PlayerManager.pMoney = PlayerManager.pMoney - cost
-                selectedUpgrade.level = selectedUpgrade.level + 1
-                print("--------")
-                print("PURCHASE MADE: ")
-                print("Store setting " .. selectedUpgrade.name .. " to level " .. selectedUpgrade.level)
-                print("--------")
-                PlayerManager:applyUpgrades()
+            local selectedUpgrade = Upgrades[selectedKey]
+            if selectedUpgrade.level < selectedUpgrade.maxLevel then
+                local cost = selectedUpgrade.costFunction(selectedUpgrade.level)
+                if PlayerManager.pMoney >= cost then
+                    PlayerManager.pMoney = PlayerManager.pMoney - cost
+                    selectedUpgrade.level = selectedUpgrade.level + 1
+                    print("--------")
+                    print("PURCHASE MADE: ")
+                    print("Store setting " .. selectedUpgrade.name .. " to level " .. selectedUpgrade.level)
+                    print("--------")
+                    PlayerManager:applyUpgrades()
+                else
+                    print("Not enough currency to upgrade " .. selectedUpgrade.name)
+                end
             else
-                print("Not enough currency to upgrade " .. selectedUpgrade.name)
+                print(selectedUpgrade.name .. " is already at max level")
             end
-        else
-            print(selectedUpgrade.name .. " is already at max level")
+        elseif self.page == "fishdex" then
+            -- Logic for viewing more information on a fish would go here
+                local selectedRow = self.gridviewDex:getSelectedRow()
+                -- local selectedKey = self.upgradeKeys[selectedRow]
+            return
         end
     end
 
-    local gridviewImage = gfx.image.new(200,200)
-    gfx.pushContext(gridviewImage)
-        self.gridview:drawInRect(0, 0, 200, 200)
-    gfx.popContext()
-    self.gridviewSprite:setImage(gridviewImage)
-    self.gridviewSprite:setZIndex(Z_INDEX.UI + 1) -- Set the z-index to ensure it appears above other sprites
+    if self.page == "shop" then
+        local gridviewImage = gfx.image.new(200,200)
+        gfx.pushContext(gridviewImage)
+            self.gridviewShop:drawInRect(0, 0, 200, 200)
+        gfx.popContext()
+        self.gridviewShopSprite:setImage(gridviewImage)
+        self.gridviewShopSprite:setZIndex(Z_INDEX.UI + 1)
+    elseif self.page == "fishdex" then
+        local gridviewImage = gfx.image.new(200,200)
+        gfx.pushContext(gridviewImage)
+            self.gridviewDex:drawInRect(0, 0, 200, 200)
+        gfx.popContext()
+        self.gridviewDexSprite:setImage(gridviewImage)
+        self.gridviewDexSprite:setZIndex(Z_INDEX.UI + 1)
+    end
 end
 
 function ShoppingMenu:show()
-    print("Showing shopping menu")
+    print("Showing menu")
     self.state = "active"
+    -- The default page will be the shop
+    self.page = "shop"
     self.spriteBG:add()
-    self.gridviewSprite:add()
+    self.gridviewShopSprite:add()
 end
 
 function ShoppingMenu:hide()
-    print("Hiding shopping menu")
+    print("Hiding menu")
     self.state = "inactive"
     self.spriteBG:remove()
-    self.gridviewSprite:remove()
+    if self.page == "shop" then
+        self.gridviewShopSprite:remove()
+    elseif self.page == "fishdex" then
+        self.gridviewDexSprite:remove()
+    end
     -- Bring back Player Sprites
     PlayerManager.pSprite:add()
     PlayerManager.rSprite:add()

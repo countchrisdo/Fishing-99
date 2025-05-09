@@ -1,4 +1,4 @@
--- Contains: PlayerManager{} and Compendium{}
+-- Contains: PlayerManager{} and FishDex{}
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 import "CoreLibs/sprites"
@@ -57,21 +57,25 @@ function PlayerManager:initialize()
     self:applyUpgrades()
 end
 
-Compendium = {
+FishDex = {
     fishList = {}
 }
-function Compendium:addFish(fish)
+function FishDex:addFish(fish)
     if not self.fishList[fish.name] then
         self.fishList[fish.name] = fish
         print("New fish discovered:", fish.name)
     end
 end
 
-function Compendium:updateFishCount(fish)
+function FishDex:updateFishCount(fish)
     if self.fishList[fish.name] then
         self.fishList[fish.name].count = (self.fishList[fish.name].count or 0) + 1
         print("Fish count updated:", fish.name, "Count:", self.fishList[fish.name].count)
     end
+end
+
+function FishDex:returnAllFish()
+    return self.fishList
 end
 
 
@@ -156,12 +160,12 @@ function PlayerManager:update()
                         curFish = FishManager.activeFish[idx].data
 
                         if curFish.discovered == false then
-                            Compendium:addFish(curFish)
+                            FishDex:addFish(curFish)
                             FishManager:markDiscovered(curFish)
                             print("New Fish Discovered:", curFish.name)
                         end
 
-                        Compendium:updateFishCount(curFish)
+                        FishDex:updateFishCount(curFish)
 
                         FishManager.activeFish[idx].sprite:remove()
                         table.insert(self.hookInventory, curFish)
@@ -271,13 +275,12 @@ function PlayerManager:applyUpgrades()
 function PlayerManager:saveState()
     local playerData = {
         pMoney = self.pMoney,
-        depth = self.depth,
-        hookInventory = self.hookInventory,
         upgrades = {
             depthMax = self.depthMax,
             hookInventorymax = self.hookInventorymax,
             baitQuality = self.baitQuality,
-        }
+        },
+        fishDex = FishDex.fishList,
     }
     SaveManager:savePlayerData(playerData)
 end
@@ -285,11 +288,12 @@ end
 function PlayerManager:loadState()
     local playerData = SaveManager:loadPlayerData()
     if playerData then
+        print("Player state loaded from save file.")
         self.pMoney = playerData.pMoney or self.pMoney
-        self.hookInventory = playerData.hookInventory or {}
         self.depthMax = playerData.upgrades.depthMax or self.baseDepthMax
         self.hookInventorymax = playerData.upgrades.hookInventorymax or self.baseHookInventorymax
         self.baitQuality = playerData.upgrades.baitQuality or self.baseBaitQuality
+        FishDex.fishList = playerData.fishDex or {}
         print("Player state loaded into PlayerManager.")
     end
 end
