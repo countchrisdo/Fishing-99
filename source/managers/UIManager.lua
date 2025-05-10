@@ -26,6 +26,8 @@ function UIManager:initialize()
     print("UIManager initialized")
 end
 
+local crankDisplayed = false
+
 function UIManager:drawUI()
     -- gfx.drawTextAligned("Current State: " .. StateManager:getState(), MaxWidth/2, 16, kTextAlignment.center)
 
@@ -50,6 +52,8 @@ function UIManager:drawUI()
 
         gfx.drawTextAligned("Depth:"..PlayerManager.depth, MaxWidth-16, 50, kTextAlignment.right)
         gfx.drawTextAligned("Fish caught: " .. #PlayerManager.hookInventory .. "/" .. PlayerManager.hookInventorymax, MaxWidth-16, 70, kTextAlignment.right)
+
+        
     end
 end
 
@@ -120,6 +124,20 @@ end
 
 function UIManager:draw()
     self:drawUI()
+
+    -- Checking for crank
+    if StateManager:getState() == "fishing" then
+        if not crankDisplayed then
+                self:displayNotification("Use Crank + DPad \n To Move!", 5000)
+                crankDisplayed = true
+            end
+        if pd:isCrankDocked() == true then
+            -- Alert the player that they need to undock it
+            pd.ui.crankIndicator:draw(0, 0)
+            
+        end
+    end
+
 end
 
 function UIManager:update()

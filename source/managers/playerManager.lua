@@ -2,6 +2,7 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 import "CoreLibs/sprites"
+import "CoreLibs/UI"
 
 PlayerManager = {
     state = "inactive",
@@ -184,6 +185,7 @@ function PlayerManager:update()
             -- print("MoveCamera Called by PlayerManager at Depth:", self.depth)
         end
     elseif StateManager.currentState == "fishing" then
+
         self:handleInput()
         local collisions = self.hSprite:overlappingSprites()
         for i, sprite in ipairs(collisions) do
