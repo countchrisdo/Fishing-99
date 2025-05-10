@@ -3,8 +3,7 @@ local gfx <const> = playdate.graphics
 
 SoundManager = {}
 
-function SoundManager:initialize()
-    self.sounds = {
+SoundManager.sounds = {
         cast = playdate.sound.sampleplayer.new("assets/sound/woosh1"),
         reel = playdate.sound.sampleplayer.new("assets/sound/Reel"),
         catch = playdate.sound.sampleplayer.new("assets/sound/FishCatch"),
@@ -13,6 +12,7 @@ function SoundManager:initialize()
         bg1 = playdate.sound.fileplayer.new("assets/sound/J2F2_overworld"),
         bg2 = playdate.sound.fileplayer.new("assets/sound/J2F2_water"),
     }
+function SoundManager:initialize()
 end
 function SoundManager:playSound(soundName, plays)
 

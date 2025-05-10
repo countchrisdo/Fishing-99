@@ -55,21 +55,21 @@ end
 
 function UIManager:textAtFish(message, x, y)
     -- Draws the value of the fish at the given coordinates
-    local rndOffset = math.random(-4, 4)
+    local rndOffset = math.random(0, 16)
 
     local sprite = gfx.sprite.new()
-    local image= gfx.image.new(100, 100)
+    local image = gfx.image.new(200, 100)
     gfx.pushContext(image)
     -- Draw a background rectangle
-        gfx.drawText("+$"..message, 50, 50)
+        gfx.drawTextAligned(message, 100, 50, kTextAlignment.center)
     gfx.popContext()
     sprite:setImage(image)
-    sprite:moveTo(x+rndOffset, y+rndOffset)
+    sprite:moveTo(x+16+rndOffset, y+rndOffset)
     sprite:setZIndex(Z_INDEX.UI)
     sprite:add()
 
     --remove the text after a delay
-    pd.timer.new(300, function()
+    pd.timer.new(500, function()
         sprite:remove()
     end)
 end
@@ -79,12 +79,12 @@ function UIManager:displayNotification(message)
     local geo = playdate.geometry
     local Animator = playdate.graphics.animator
 
-    local startPoint = geo.point.new(MaxWidth/2, -64)
-    local endPoint = geo.point.new(MaxWidth/2, 64)
+    local startPoint = geo.point.new(-MaxWidth, MaxHeight/2)
+    local endPoint = geo.point.new(MaxWidth/2, MaxHeight/2)
 
     local yOffset = CameraManager.cameraPosition.y
     local notificationSprite = gfx.sprite.new()
-    local notificationImage = gfx.image.new(MaxWidth, 32)
+    local notificationImage = gfx.image.new(MaxWidth, MaxHeight)
 
     local line1 = geo.lineSegment.new(startPoint.x, startPoint.y + yOffset, endPoint.x, endPoint.y + yOffset)
 
@@ -94,11 +94,7 @@ function UIManager:displayNotification(message)
     gfx.pushContext(notificationImage)
         -- Draw a background rectangle
         gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(0, 0, notificationImage.width, notificationImage.height)
-        gfx.setColor(gfx.kColorWhite)
-        gfx.drawRect(0, 0, notificationImage.width - 8, notificationImage.height - 8)
-        gfx.setColor(gfx.kColorWhite)
-        gfx.drawTextAligned(message, MaxWidth/2, notificationImage.height/2, kTextAlignment.center)
+        gfx.drawTextAligned(message, notificationImage.height/2, notificationImage.height/2, kTextAlignment.left)
     gfx.popContext()
 
     notificationSprite:setImage(notificationImage)

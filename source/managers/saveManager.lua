@@ -28,6 +28,28 @@ function SaveManager:saveUpgradeLevels()
     end
 end
 
+-- Save fish data
+function SaveManager:saveFishData()
+    local fishData = {}
+    for i, fish in ipairs(FishManager.FISHDATA) do
+        fishData[i] = {
+            name = fish.name,
+            discovered = fish.discovered,
+            depth = fish.depth,
+            timeOfDay = fish.timeOfDay,
+            size = fish.size,
+            value = fish.value
+        }
+    end
+
+    local success, errorMessage = pd.datastore.write(fishData, "fishData", true)
+    if success then
+        print("Fish data saved successfully.")
+    else
+        print("Error saving fish data:", errorMessage)
+    end
+end
+
 --- LOADING
 -- Load player data
 function SaveManager:loadPlayerData()
@@ -61,6 +83,23 @@ function SaveManager:loadUpgradeLevels()
         end
     else
         print("No upgrade levels save file found.")
+    end
+end
+
+-- Load fish data
+function SaveManager:loadFishData()
+    if pd.file.exists("fishData.json") then
+        local fishData = pd.datastore.read("fishData")
+        if fishData then
+            for i, fish in ipairs(fishData) do
+                FishManager.FISHDATA[i].discovered = fish.discovered
+            end
+            print("Fish data loaded successfully.")
+        else
+            print("Error loading fish data.")
+        end
+    else
+        print("No fish data save file found.")
     end
 end
 

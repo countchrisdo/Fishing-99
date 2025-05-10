@@ -11,7 +11,7 @@ function MainMenu:initialize()
     if StateManager:getState() == "main menu" then
         local spriteBG = gfx.sprite.new(UIManager.BgImg)
         local spriteTitle = gfx.sprite.new()
-        local spriteButton = gfx.sprite.spriteWithText("Press A to start", MaxWidth, MaxHeight)
+        local spriteButton = gfx.sprite.spriteWithText("Press A to start!", MaxWidth, MaxHeight)
 
         local imageSpriteTitle = gfx.image.new(400, 240)
 
@@ -19,7 +19,7 @@ function MainMenu:initialize()
 
         -- Draw text on the image
         gfx.pushContext(imageSpriteTitle)
-            gfx.drawTextAligned("Main Menu", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
+            gfx.drawTextAligned("Fish Fear Me: 99", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
         
         gfx.popContext()
 

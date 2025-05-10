@@ -75,6 +75,7 @@ function FishManager:spawnFish(depth, timeOfDay)
 
     local fish = availableFish[math.random(#availableFish)]
     local fishImage = nil
+    print("Spawning fish:", fish)
     if fish.discovered then
         print("Known Fish Spawn:", fish.name)
         fishImage = gfx.image.new(fish.spritePath)
@@ -147,11 +148,12 @@ function FishManager:updateFish()
 end
 
 function FishManager:markDiscovered(curfish)
+    print("Running FishManager:markDiscovered", curfish.name)
     -- Update fish data to mark it as discovered
     for i, fish in ipairs(self.FISHDATA) do
         if fish.name == curfish.name then
             fish.discovered = true
-            print("Fish data updated: Discovered ", fish.name)
+            print("Fish Data updated: Discovered ", fish.name)
             break
         end
     end

@@ -12,7 +12,7 @@ local FISHDATA = {
     {
         name = "Floppy Fish",
         value = 2,
-        depthRange = { min = 100, max = 100 },
+        depthRange = { min = 100, max = 300 },
         spritePath = "assets/sprites/fish/floppy",
         discovered = true,
         spawnTime = "any",
@@ -22,7 +22,7 @@ local FISHDATA = {
     {
         name = "Fish Friend",
         value = 10,
-        depthRange = { min = 50, max = 300 },
+        depthRange = { min = 50, max = 400 },
         spritePath = "assets/sprites/fish/fishfriend",
         discovered = false,
         spawnTime = "day",
@@ -31,7 +31,7 @@ local FISHDATA = {
     },
     {
         name = "Eye Fish",
-        value = 20,
+        value = 15,
         depthRange = { min = 100, max = 400 },
         spritePath = "assets/sprites/fish/eyefish",
         discovered = false,
@@ -41,7 +41,7 @@ local FISHDATA = {
     },
     {
         name = "Lore Fish",
-        value = 1,
+        value = 10,
         depthRange = { min = 50, max = 300 },
         spritePath = "assets/sprites/fish/lorefish",
         discovered = false,
@@ -71,7 +71,7 @@ local FISHDATA = {
     },
     {
         name = "Devilish",
-        value = 50,
+        value = 75,
         depthRange = { min = 300, max = 1000 },
         spritePath = "assets/sprites/fish/devilish",
         discovered = false,

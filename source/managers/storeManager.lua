@@ -6,7 +6,8 @@ import "CoreLibs/graphics"
 import "CoreLibs/timer"
 import "CoreLibs/sprites"
 import "CoreLibs/UI"
-import"CoreLibs/nineslice"
+import "CoreLibs/nineslice"
+import "CoreLibs/crank"
 
 StoreManager = {}
 
@@ -18,13 +19,11 @@ Upgrades = {
         name = "Line Length",
         description = "Fish deeper waters.",
         level = 0,
-        maxLevel = 5,
+        maxLevel = 10,
         costFunction = function(level) return 50 + level * 75 end,
         apply = function(player)
             local upgradeLevel = Upgrades.lineLength.level
-            print("- depthMax:apply() running upgrade: Upgrade Level" ..upgradeLevel)
             player.depthMax = player.baseDepthMax + (upgradeLevel * 100)
-            print("New DepthMax: " .. player.depthMax .. " (Base " .. player.baseDepthMax .. " + Upgrade Level " .. upgradeLevel .. ")")
         end
     },
     hookCapacity = {
@@ -36,9 +35,7 @@ Upgrades = {
         costFunction = function(level) return 50 + level * 50 end,
         apply = function(player)
             local upgradeLevel = Upgrades.hookCapacity.level
-            print("- hookCapacity:apply running Upgrade Level " ..upgradeLevel)
             player.hookInventorymax = player.baseHookInventorymax + upgradeLevel
-            print("New hook capacity: " ..player.hookInventorymax .." (Base " ..player.baseHookInventorymax .." + Upgrade Level " ..upgradeLevel .. ")")
         end
     },
     baitQuality = {
@@ -49,20 +46,18 @@ Upgrades = {
         maxLevel = 5,
         costFunction = function(level) return 50 + level * 100 end,
         apply = function(player)
-            print("- baitQuality:apply() Running")
             local upgradeLevel = Upgrades.baitQuality.level
-            print("Current bait quality: " .. player.baitQuality)
-            player.baitQuality = player.baitQuality + (upgradeLevel * 0.5)
-            print("New bait quality: " .. player.baitQuality .. " (Base + Upgrade Level " .. upgradeLevel .. " * 0.5)")
+            player.baitQuality = player.baitQuality + (upgradeLevel * 0.25)
+            print("Bait quality set to: " .. player.baitQuality)
         end
     },
 }
 
 ShoppingMenu = {
     state = "inactive",
-    states = { "inactive", "active"},
-    page = {"shop"},
-    pages = {"shop", "fishdex", "options"}
+    states = { "inactive", "active" },
+    page = { "shop" },
+    pages = { "shop", "fishdex", "options" }
 }
 
 function ShoppingMenu:initialize()
@@ -75,7 +70,7 @@ function ShoppingMenu:initialize()
     self.gridviewShop = pd.ui.gridview.new(0, 32)
     self.gridviewDex = pd.ui.gridview.new(0, 32)
     self.upgradeKeys = {} -- Create a list of keys from the Upgrades table
-    self.fishDexArr = {} -- Create a list of keys from the FishDex table
+    self.fishDexArr = {}  -- Create a list of keys from the FishDex table
     for key in pairs(Upgrades) do
         table.insert(self.upgradeKeys, key)
     end
@@ -112,14 +107,14 @@ function ShoppingMenu:initialize()
     -- Pre-render the gridviewShop image
     local gridviewShopImage = gfx.image.new(200, 200)
     gfx.pushContext(gridviewShopImage)
-        self.gridviewShop:drawInRect(0, 0, 200, 200)
+    self.gridviewShop:drawInRect(0, 0, 200, 200)
     gfx.popContext()
     self.gridviewShopSprite:setImage(gridviewShopImage)
 
     -- Pre-render the gridviewDex image
     local gridviewDexImage = gfx.image.new(200, 200)
     gfx.pushContext(gridviewDexImage)
-        self.gridviewDex:drawInRect(0, 0, 200, 200)
+    self.gridviewDex:drawInRect(0, 0, 200, 200)
     gfx.popContext()
     self.gridviewDexSprite:setImage(gridviewDexImage)
 
@@ -127,6 +122,7 @@ function ShoppingMenu:initialize()
         local fontHeight = gfx.getSystemFont():getHeight()
         gfx.drawTextAligned("Shop", x + width / 2, y + (height / 2 - fontHeight / 2) + 2, kTextAlignment.center)
     end
+
     function self.gridviewDex:drawCell(section, row, column, selected, x, y, width, height)
         if selected then
             gfx.fillRoundRect(x, y, width, height, 4)
@@ -135,20 +131,27 @@ function ShoppingMenu:initialize()
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
         end
         local key = ShoppingMenu.fishDexArr[row]
-        local fishName = "not set"
+        local fishName = "???"
         if not FishDex.fishList[key] then
             print("Fish name not found for key")
             return
         end
-        fishName = FishDex.fishList[key].name
-        if FishDex.fishList[key].count == nil then
-            FishDex.fishList[key].count = 0
+        if FishDex.fishList[key].discovered == nil then
+            print("Fish name not found for key")
+            return
+        end
+        if FishDex.fishList[key].discovered then
+            fishName = key
+        else
+            fishName = "???"
         end
         local fishCount = FishDex.fishList[key].count
 
         local fontHeight = gfx.getSystemFont():getHeight()
-        gfx.drawTextInRect(fishName .. " : +" .. fishCount, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
+        gfx.drawTextInRect(fishName .. " : " .. fishCount, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil,
+            nil, kTextAlignment.center)
     end
+
     function self.gridviewDex:drawSectionHeader(section, x, y, width, height)
         local fontHeight = gfx.getSystemFont():getHeight()
         gfx.drawTextAligned("FishDex", x + width / 2, y + (height / 2 - fontHeight / 2) + 2, kTextAlignment.center)
@@ -168,7 +171,8 @@ function ShoppingMenu:initialize()
         local upgradeCost = Upgrades[key].costFunction(upgradeLvl)
 
         local fontHeight = gfx.getSystemFont():getHeight()
-        gfx.drawTextInRect(upgradeName .. " : " .. upgradeLvl .. " - " .. upgradeCost, x, y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
+        gfx.drawTextInRect(upgradeName .. " : " .. upgradeLvl .. " - " .. upgradeCost, x,
+            y + (height / 2 - fontHeight / 2) + 2, width, height, nil, nil, kTextAlignment.center)
     end
 
     self.spriteBG:remove()
@@ -179,7 +183,7 @@ function ShoppingMenu:initialize()
 end
 
 function ShoppingMenu:update()
--- ShoppingMenu has become the source for multiple menus (pages)
+    -- ShoppingMenu has become the source for multiple menus (pages)
     if self.state == "inactive" then
         return
     end
@@ -197,11 +201,26 @@ function ShoppingMenu:update()
         elseif pd.buttonJustPressed(playdate.kButtonDown) then
             self.gridviewShop:selectNextRow(true)
         end
+        -- Crank input for scrolling
+        local crankTicks = pd.getCrankTicks(2)
+        if crankTicks == 1 then
+            self.gridviewShop:selectNextRow(true)
+        elseif crankTicks == -1 then
+            self.gridviewShop:selectPreviousRow(true)
+        end
     elseif self.page == "fishdex" then
         if pd.buttonJustPressed(playdate.kButtonUp) then
             self.gridviewDex:selectPreviousRow(true)
         elseif pd.buttonJustPressed(playdate.kButtonDown) then
             self.gridviewDex:selectNextRow(true)
+        end
+
+        -- Crank input for scrolling
+        local crankTicks = pd.getCrankTicks(2)
+        if crankTicks == 1 then
+            self.gridviewDex:selectNextRow(true)
+        elseif crankTicks == -1 then
+            self.gridviewDex:selectPreviousRow(true)
         end
     end
 
@@ -264,23 +283,23 @@ function ShoppingMenu:update()
             end
         elseif self.page == "fishdex" then
             -- Logic for viewing more information on a fish would go here
-                local selectedRow = self.gridviewDex:getSelectedRow()
-                -- local selectedKey = self.upgradeKeys[selectedRow]
+            local selectedRow = self.gridviewDex:getSelectedRow()
+            -- local selectedKey = self.upgradeKeys[selectedRow]
             return
         end
     end
 
     if self.page == "shop" then
-        local gridviewImage = gfx.image.new(200,200)
+        local gridviewImage = gfx.image.new(200, 200)
         gfx.pushContext(gridviewImage)
-            self.gridviewShop:drawInRect(0, 0, 200, 200)
+        self.gridviewShop:drawInRect(0, 0, 200, 200)
         gfx.popContext()
         self.gridviewShopSprite:setImage(gridviewImage)
         self.gridviewShopSprite:setZIndex(Z_INDEX.UI + 1)
     elseif self.page == "fishdex" then
-        local gridviewImage = gfx.image.new(200,200)
+        local gridviewImage = gfx.image.new(200, 200)
         gfx.pushContext(gridviewImage)
-            self.gridviewDex:drawInRect(0, 0, 200, 200)
+        self.gridviewDex:drawInRect(0, 0, 200, 200)
         gfx.popContext()
         self.gridviewDexSprite:setImage(gridviewImage)
         self.gridviewDexSprite:setZIndex(Z_INDEX.UI + 1)

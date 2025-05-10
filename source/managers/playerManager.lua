@@ -6,6 +6,7 @@ import "CoreLibs/sprites"
 PlayerManager = {
     state = "inactive",
     states = { "inactive", "active"},
+    allFishCaught = false,
     pMoney = 0,
     hookSpeed = 2,
     -- Upgrades
@@ -60,23 +61,62 @@ end
 FishDex = {
     fishList = {}
 }
+
+-- Function to populate fishList using FishManager.FISHDATA
+function FishDex:initialize()
+    print("FishDex:initialize() called")
+    for _, fish in ipairs(FishManager.FISHDATA) do
+        -- Rememeber! fish.name is a key to find the fish table here.
+        self.fishList[fish.name] = {
+            value = fish.value,
+            depthRange = fish.depthRange,
+            spritePath = fish.spritePath,
+            discovered = fish.discovered,
+            spawnTime = fish.spawnTime,
+            description = fish.description,
+            lore = fish.lore,
+            count = 0 -- Initialize count to 0
+        }
+    end
+    printTable(FishDex.fishList)
+    print("FishDex initialized with data from FishManager.FISHDATA.")
+end
+
 function FishDex:addFish(fish)
-    if not self.fishList[fish.name] then
-        self.fishList[fish.name] = fish
-        print("New fish discovered:", fish.name)
+    -- This fish object is a copy of the fish object from FishManager
+    -- So fish.name is a val
+    print("FishDex:addFish() called with fish:", fish.name)
+    if self.fishList[fish.name] then
+        self.fishList[fish.name].discovered = true
+        print(fish.name .. " discovered!")
+        print("FishDex updated with new fish:", fish.name)
         ShoppingMenu:refreshFishDexArr()
     end
 end
 
 function FishDex:updateFishCount(fish)
     if self.fishList[fish.name] then
-        self.fishList[fish.name].count = (self.fishList[fish.name].count or 0) + 1
+        self.fishList[fish.name].count += 1
         print("Fish count updated:", fish.name, "Count:", self.fishList[fish.name].count)
     end
 end
 
 function FishDex:returnAllFish()
     return self.fishList
+end
+
+function FishDex:hasCaughtAllFish()
+    print("Running hasCaughtAllFish()")
+    -- Check if all fish in the fishList have been discovered
+    for _, fish in pairs(self.fishList) do
+        print("Checking fish:", fish.name, "Discovered:", fish.discovered)
+        if fish.discovered == false then
+            print("Fish not discovered:", fish.name)
+            return false -- At least one fish hasn't been caught
+        end
+    end
+    print("All fish have been caught at least once.")
+    return true -- All fish have been caught at least once
 end
 
 function PlayerManager:draw()
@@ -132,20 +172,16 @@ function PlayerManager:update()
         -- Stop moving when the hook reaches the target position
         if self.hSprite.x >= targetX and self.hSprite.y >= targetY then
             print("Hook reached the center of the screen.")
-
             -- Play this sound when hook collides with the water
             -- SoundManager:playSound("splash", 1)
-
             StateManager:setState("fishing")
         end
-
         -- Move Depth lower
         if self.depth < 125 then
             self.depth = self.depth + 2
             CameraManager:moveCamera(self.depth)
             -- print("MoveCamera Called by PlayerManager at Depth:", self.depth)
         end
-
     elseif StateManager.currentState == "fishing" then
         self:handleInput()
         local collisions = self.hSprite:overlappingSprites()
@@ -153,18 +189,27 @@ function PlayerManager:update()
             if sprite:getTag() == 2 then -- Tag 2 = Fish
                 print("Collision with fish detected!")
                 local curFish = nil
-                -- Add a Fishing Cooldown here?
                 for idx = 1, #FishManager.activeFish do
                     if FishManager.activeFish[idx].sprite == sprite then
                         curFish = FishManager.activeFish[idx].data
+                        print("Fish data found:", curFish)
 
                         if curFish.discovered == false then
                             FishDex:addFish(curFish)
                             FishManager:markDiscovered(curFish)
                             print("New Fish Discovered:", curFish.name)
+                            UIManager:textAtFish("New Fish Discovered!", self.hSprite.x, self.hSprite.y)
                         end
 
                         FishDex:updateFishCount(curFish)
+
+                        -- Check if all fish have been caught
+                        if not self.allFishCaught and FishDex:hasCaughtAllFish() then
+                            self.allFishCaught = true
+                            print("Congratulations! \n FishDex Complete!")
+                            UIManager:displayNotification("Congratulations! \n FishDex Complete!")
+                            -- Trigger any additional rewards or events here
+                        end
 
                         FishManager.activeFish[idx].sprite:remove()
                         table.insert(self.hookInventory, curFish)
@@ -172,8 +217,9 @@ function PlayerManager:update()
                         table.remove(FishManager.activeFish, idx)
                         sprite:remove()
                         print("Caught fish:", curFish.name)
-                        print("Fish value:", curFish.value)
-                        UIManager:textAtFish(curFish.value * self.baitQuality, self.hSprite.x, self.hSprite.y)
+                        print("Bait quality:", self.baitQuality)
+                        print("Fish value:", curFish.value * self.baitQuality)
+                        UIManager:textAtFish("+$"..math.floor(curFish.value * self.baitQuality), self.hSprite.x, self.hSprite.y - 32)
                         SoundManager:playSound("catch", 1)
                         break
                     end
@@ -279,21 +325,25 @@ function PlayerManager:saveState()
             hookInventorymax = self.hookInventorymax,
             baitQuality = self.baitQuality,
         },
+        allFishCaught = self.allFishCaught,
         FishDex = FishDex,
     }
     SaveManager:savePlayerData(playerData)
 end
 
 function PlayerManager:loadState()
+    print("PlayerManager:loadState() called")
     local playerData = SaveManager:loadPlayerData()
     if playerData then
-        print("Player state loaded from save file.")
+        print("-playerData loaded from save file.")
         self.pMoney = playerData.pMoney or self.pMoney
         self.depthMax = playerData.upgrades.depthMax or self.baseDepthMax
         self.hookInventorymax = playerData.upgrades.hookInventorymax or self.baseHookInventorymax
         self.baitQuality = playerData.upgrades.baitQuality or self.baseBaitQuality
+        self.allFishCaught = playerData.allFishCaught or self.allFishCaught
         FishDex.fishList = playerData.FishDex.fishList or FishDex.fishList
-        print("Player state loaded into PlayerManager.")
+        printTable(playerData.FishDex)
+        print("-playerData set into PlayerManager.")
     end
 end
 

@@ -20,7 +20,6 @@ function LoadToMenu()
     CameraManager:initialize()
     UIManager:initialize()
     MainMenu:initialize()
-    SoundManager:initialize()
 end
 
 function LoadToGame()
@@ -29,34 +28,40 @@ function LoadToGame()
     gfx.clear()
 
     StateManager:setState("idle")
+    FishDex:initialize()
+    FishManager:initialize()
     PlayerManager:initialize()
     PlayerManager:loadState()
     CameraManager:initialize()
-    FishManager:initialize()
     UIManager:initialize()
     ShoppingMenu:initialize()
     SoundManager:initialize()
 end
 
+-- Todo: Fix that discovered fish are not saved
+
 LoadToMenu()
 -- LoadToGame()
 
 -- not playing yet to test sfx, remember to renable BGMswitch too
--- SoundManager:playBGM()
+SoundManager:playBGM()
 
 function pd.gameWillTerminate()
     PlayerManager:saveState()
     SaveManager:saveUpgradeLevels()
+    SaveManager:saveFishData()
 end
 
 function pd.gameWillPause()
     PlayerManager:saveState()
     SaveManager:saveUpgradeLevels()
+    SaveManager:saveFishData()
 end
 
 -- Load player state on game start
 PlayerManager:loadState()
 SaveManager:loadUpgradeLevels()
+SaveManager:loadFishData()
 
 -- One day you need to clean up this mess of an update loop
 function pd.update()
@@ -99,6 +104,9 @@ function pd.serialMessageReceived(message)
         SaveManager:deleteAllSaves()
         print("Save cleared.")
         print("Game saved.")
+    elseif message == "win" then
+        UIManager:displayNotification("You've caught all fish!")
+        print("You win!")
     else
         print("Unknown Command")
     end

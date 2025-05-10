@@ -17,7 +17,7 @@ StateManager = {
 function StateManager:setState(newState)
     if table.indexOfElement(self.states, newState) then
         self.currentState = newState
-        -- SoundManager:switchBGM(newState)
+        SoundManager:switchBGM(newState)
         print("State changed to:", newState)
     else
         print("Invalid state:", newState)
