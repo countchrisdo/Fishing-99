@@ -74,13 +74,15 @@ function UIManager:textAtFish(message, x, y)
     end)
 end
 
-function UIManager:displayNotification(message)
+function UIManager:displayNotification(message, delay)
     -- Display a notification message on the screen
     local geo = playdate.geometry
     local Animator = playdate.graphics.animator
+    local width, height = gfx.getTextSize(message)
+    local fontHeight = gfx.getSystemFont():getHeight()
 
     local startPoint = geo.point.new(-MaxWidth, MaxHeight/2)
-    local endPoint = geo.point.new(MaxWidth/2, MaxHeight/2)
+    local endPoint = geo.point.new(MaxWidth/2 - width/2, MaxHeight/2)
 
     local yOffset = CameraManager.cameraPosition.y
     local notificationSprite = gfx.sprite.new()
@@ -92,22 +94,25 @@ function UIManager:displayNotification(message)
     -- spriteAnimation.repeatCount = 1
 
     gfx.pushContext(notificationImage)
-        -- Draw a background rectangle
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawTextAligned(message, notificationImage.height/2, notificationImage.height/2, kTextAlignment.left)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+
+
+        gfx.fillRect(notificationImage.width/2, notificationImage.height/2, width + 16, height + 16)
+        -- gfx.drawTextAligned(message, notificationImage.height/2, notificationImage.height/2, kTextAlignment.left)
+        gfx.drawTextAligned(message, notificationImage.width/2 + 8, (notificationImage.height/2 + fontHeight/2) , kTextAlignment.left)
     gfx.popContext()
 
     notificationSprite:setImage(notificationImage)
     -- move towards goalY
 
     notificationSprite:moveTo(startPoint.x, endPoint.y + yOffset)
-    notificationSprite:setZIndex(Z_INDEX.UI)
+    notificationSprite:setZIndex(Z_INDEX.UI + 100)
     notificationSprite:add()
 
     notificationSprite:setAnimator(spriteAnimation)
 
     -- Remove the sprite after a delay
-    pd.timer.new(2000, function()
+    pd.timer.new(delay, function()
         -- Move the sprite back off the top of the screen
         notificationSprite:remove()
     end)

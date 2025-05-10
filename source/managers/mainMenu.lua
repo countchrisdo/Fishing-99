@@ -12,6 +12,8 @@ function MainMenu:initialize()
         local spriteBG = gfx.sprite.new(UIManager.BgImg)
         local spriteTitle = gfx.sprite.new()
         local spriteButton = gfx.sprite.spriteWithText("Press A to start!", MaxWidth, MaxHeight)
+        local spriteCredits = gfx.sprite.spriteWithText("_A Game by *CountChrisdo* \n Art by *SeeroftheNight*_", MaxWidth, MaxHeight)
+        SoundManager:playSound("open", 1)
 
         local imageSpriteTitle = gfx.image.new(400, 240)
 
@@ -20,21 +22,24 @@ function MainMenu:initialize()
         -- Draw text on the image
         gfx.pushContext(imageSpriteTitle)
             gfx.drawTextAligned("Fish Fear Me: 99", MaxWidth/2, MaxHeight/2, kTextAlignment.center)
-        
+    
         gfx.popContext()
 
         spriteTitle:setImage(imageSpriteTitle:scaledImage(2))
 
         spriteBG:moveTo(MaxWidth/2, MaxHeight/2)
-        spriteTitle:moveTo(MaxWidth/2, 64)
-        spriteButton:moveTo(MaxWidth/2, 170)
+        spriteTitle:moveTo(MaxWidth/2, 68)
+        spriteButton:moveTo(MaxWidth/2, 116)
+        spriteCredits:moveTo(MaxWidth/2, 48)
         spriteBG:setZIndex(Z_INDEX.UI)
         spriteTitle:setZIndex(Z_INDEX.UI)
         spriteButton:setZIndex(Z_INDEX.UI)
+        spriteCredits:setZIndex(Z_INDEX.UI)
 
         spriteBG:add()
         spriteTitle:add()
         spriteButton:add()
+        spriteCredits:add()
 
         print("State = MainMenu")
         print("Main Menu initialized")
@@ -48,7 +53,7 @@ function MainMenu:update()
         end
 
         if playdate.buttonJustPressed(playdate.kButtonA) then
-            print("A pressed: Starting game from main menu")
+            SoundManager:playSound("select", 1)
             gfx.sprite.removeAll()
             gfx.clear()
             LoadToGame()

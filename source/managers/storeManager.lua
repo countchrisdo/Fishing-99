@@ -60,6 +60,8 @@ ShoppingMenu = {
     pages = { "shop", "fishdex", "options" }
 }
 
+local notificationDisplayed = false -- Add a flag to track if the notification has been shown
+
 function ShoppingMenu:initialize()
     print("Gridviews initializing")
 
@@ -198,29 +200,37 @@ function ShoppingMenu:update()
     if self.page == "shop" then
         if pd.buttonJustPressed(playdate.kButtonUp) then
             self.gridviewShop:selectPreviousRow(true)
+            SoundManager:playUIsound("move")
         elseif pd.buttonJustPressed(playdate.kButtonDown) then
             self.gridviewShop:selectNextRow(true)
+            SoundManager:playUIsound("move")
         end
         -- Crank input for scrolling
         local crankTicks = pd.getCrankTicks(2)
         if crankTicks == 1 then
             self.gridviewShop:selectNextRow(true)
+            SoundManager:playUIsound("move")
         elseif crankTicks == -1 then
             self.gridviewShop:selectPreviousRow(true)
+            SoundManager:playUIsound("move")
         end
     elseif self.page == "fishdex" then
         if pd.buttonJustPressed(playdate.kButtonUp) then
             self.gridviewDex:selectPreviousRow(true)
+            SoundManager:playUIsound("move")
         elseif pd.buttonJustPressed(playdate.kButtonDown) then
             self.gridviewDex:selectNextRow(true)
+            SoundManager:playUIsound("move")
         end
 
         -- Crank input for scrolling
         local crankTicks = pd.getCrankTicks(2)
         if crankTicks == 1 then
             self.gridviewDex:selectNextRow(true)
+            SoundManager:playUIsound("move")
         elseif crankTicks == -1 then
             self.gridviewDex:selectPreviousRow(true)
+            SoundManager:playUIsound("move")
         end
     end
 
@@ -230,22 +240,22 @@ function ShoppingMenu:update()
         self.gridviewShopSprite:remove()
         self.gridviewDexSprite:add()
         self.page = "fishdex"
-        print("Left pressed: Changing page to fishdex")
+        SoundManager:playUIsound("move")
     elseif pd.buttonJustPressed(playdate.kButtonRight) and self.page == "shop" then
         self.gridviewShopSprite:remove()
         self.gridviewDexSprite:add()
         self.page = "fishdex"
-        print("Right pressed: Changing page to fishdex")
+        SoundManager:playUIsound("move")
     elseif pd.buttonJustPressed(playdate.kButtonLeft) and self.page == "fishdex" then
         self.gridviewDexSprite:remove()
         self.gridviewShopSprite:add()
         self.page = "shop"
-        print("Left pressed: Changing page to shop")
+        SoundManager:playUIsound("move")
     elseif pd.buttonJustPressed(playdate.kButtonRight) and self.page == "fishdex" then
         self.gridviewDexSprite:remove()
         self.gridviewShopSprite:add()
         self.page = "shop"
-        print("Right pressed: Changing page to shop")
+        SoundManager:playUIsound("move")
     end
 
     -- Exit the menu
@@ -255,6 +265,7 @@ function ShoppingMenu:update()
         end)
 
         print("B pressed: Exiting shopping menu")
+        SoundManager:playUIsound("exit")
         self:hide()
         StateManager:setState("idle")
     end
@@ -274,6 +285,7 @@ function ShoppingMenu:update()
                     print("PURCHASE MADE: ")
                     print("Store setting " .. selectedUpgrade.name .. " to level " .. selectedUpgrade.level)
                     print("--------")
+                    SoundManager:playUIsound("select")
                     PlayerManager:applyUpgrades()
                 else
                     print("Not enough currency to upgrade " .. selectedUpgrade.name)
@@ -282,9 +294,7 @@ function ShoppingMenu:update()
                 print(selectedUpgrade.name .. " is already at max level")
             end
         elseif self.page == "fishdex" then
-            -- Logic for viewing more information on a fish would go here
             local selectedRow = self.gridviewDex:getSelectedRow()
-            -- local selectedKey = self.upgradeKeys[selectedRow]
             return
         end
     end
@@ -313,6 +323,12 @@ function ShoppingMenu:show()
     self.page = "shop"
     self.spriteBG:add()
     self.gridviewShopSprite:add()
+
+    -- Display the notification only if it hasn't been shown before
+    if not notificationDisplayed then
+        UIManager:displayNotification("Press [Right] to See the \n FISHDEX", 3000)
+        notificationDisplayed = true -- Set the flag to true
+    end
 end
 
 function ShoppingMenu:hide()

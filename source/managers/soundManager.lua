@@ -4,11 +4,19 @@ local gfx <const> = playdate.graphics
 SoundManager = {}
 
 SoundManager.sounds = {
+        -- Sound Effects
         cast = playdate.sound.sampleplayer.new("assets/sound/woosh1"),
         reel = playdate.sound.sampleplayer.new("assets/sound/Reel"),
         catch = playdate.sound.sampleplayer.new("assets/sound/FishCatch"),
         splash = playdate.sound.sampleplayer.new("assets/sound/Splash"),
         cash = playdate.sound.sampleplayer.new("assets/sound/coin1"),
+        -- UI Sounds
+        move = playdate.sound.sampleplayer.new("assets/sound/click_002"),
+        select = playdate.sound.sampleplayer.new("assets/sound/select_001"),
+        cancel = playdate.sound.sampleplayer.new("assets/sound/click_003"),
+        exit = playdate.sound.sampleplayer.new("assets/sound/minimize_003"),
+        open = playdate.sound.sampleplayer.new("assets/sound/maximize_003"),
+        -- Music
         bg1 = playdate.sound.fileplayer.new("assets/sound/J2F2_overworld"),
         bg2 = playdate.sound.fileplayer.new("assets/sound/J2F2_water"),
     }
@@ -29,6 +37,24 @@ function SoundManager:playSound(soundName, plays)
     end
 end
 
+function SoundManager:playUIsound(input)
+    if input == "move" then
+        self:playSound("move", 1)
+    end
+    if input == "select" then
+        self:playSound("select", 1)
+    end
+    if input == "cancel" then
+        self:playSound("cancel", 1)
+    end
+    if input == "open" then
+        self:playSound("open", 1)
+    end
+    if input == "exit" then
+        self:playSound("exit", 1)
+    end
+end
+
 function SoundManager:stopSound(soundName)
     if self.sounds[soundName] then
         self.sounds[soundName]:stop()
@@ -42,6 +68,8 @@ function SoundManager:playBGM()
         self.sounds.bg1:play()
     end
 end
+
+
 
 function SoundManager:switchBGM(gameState)
     local currentOffset = 0

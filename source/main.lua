@@ -20,6 +20,7 @@ function LoadToMenu()
     CameraManager:initialize()
     UIManager:initialize()
     MainMenu:initialize()
+    -- UIManager:displayNotification("Welcome to my Game!", 2000)
 end
 
 function LoadToGame()

@@ -151,6 +151,7 @@ function PlayerManager:update()
             end)
             print("B button pressed, opening shopping menu...")
             StateManager:setState("shopping")
+            SoundManager:playUIsound("open")
             ShoppingMenu:show()
             self.pSprite:remove()
             self.rSprite:remove()
@@ -207,7 +208,7 @@ function PlayerManager:update()
                         if not self.allFishCaught and FishDex:hasCaughtAllFish() then
                             self.allFishCaught = true
                             print("Congratulations! \n FishDex Complete!")
-                            UIManager:displayNotification("Congratulations! \n FishDex Complete!")
+                            UIManager:displayNotification("Congratulations! \n FishDex Complete!", 2000)
                             -- Trigger any additional rewards or events here
                         end
 
