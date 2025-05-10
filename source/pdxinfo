@@ -1,6 +1,7 @@
 name=Fish Fear Me 99
 author=CountChrisdo
-description=Fishest Gup has a new look!
+description=Fishest Gup has been Teleported to the future! Help him find his way back home by collecting all the fish in the world!
 bundleID=com.countchrisdo.FishFearMe99
-version=1.0.1
-buildNumber=2
+version=1.0.2
+buildNumber=3
+imagePath=assets/launcher/
